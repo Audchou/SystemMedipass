@@ -336,7 +336,7 @@ public class Main {
 
 		        systeme.creerConsultation(patient, motif, observations);
 		    }
-
+		    
 		    private static void creerPrescription() {
 		        Patient patient = trouverPatient();
 		        if (patient == null) return;
@@ -438,9 +438,8 @@ public class Main {
 			        String type = scanner.nextLine();
 			        System.out.print("Ajouter une courte description : ");
 			        String desc = scanner.nextLine();
-			        System.out.print("La date d'enregistrement de l'antécédent : ");
-			        String date = scanner.nextLine();
-			        dossier.ajouterAntecedent(new MedicalHistory(type, desc, dateEnregistrement));
+			        MedicalHistory antecedent = new MedicalHistory(type, desc);
+			        dossier.ajouterAntecedent(antecedent);
 			        System.out.println("Antécédent ajouté avec succès !");
 			    } else {
 			        System.out.println("Dossier introuvable !");
@@ -455,9 +454,11 @@ public class Main {
 			        } catch (NumberFormatException e) {
 			            return -1;
 			        }
-			 
+			        
 		    }
+		        
 		}
+		
 
 	
 	

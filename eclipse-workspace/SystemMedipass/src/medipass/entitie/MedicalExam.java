@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public class MedicalExam {
 	
-	 private String id;
+	    private String id;
 	    private LocalDateTime date;
 	    private String type; // Ex: Radiographie, Analyse de sang
 	    private String resultat;
