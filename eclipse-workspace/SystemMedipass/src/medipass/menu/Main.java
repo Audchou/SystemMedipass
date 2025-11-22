@@ -1,12 +1,11 @@
 package medipass.menu;
 
 import java.time.LocalDate;
+
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import java.util.Scanner;
-
-
 import medipass.system.SystemeMedipass;
 
 import medipass.entitie.*;
@@ -132,9 +131,10 @@ public class Main {
 		        	}
 		        	System.out.println("1. Gestion des patients");
 		        	System.out.println("2. Gestion des consultations");
-		        	System.out.println("3. Gestion des prescriptions");
+		        	System.out.println("3. Gestion des prescriptions(Bonus)");
 		            System.out.println("4. Ajouter un examen médical (Bonus)");
 		            System.out.println("5. Exporter les données (CSV - Bonus)");
+		            System.out.println("6. Gestionnaire d'archives(Bonus)");
 		            System.out.println("0. Déconnexion");
 		            System.out.print("Votre choix: ");
 		            choix = lireChoix();
@@ -143,7 +143,7 @@ public class Main {
 		            switch (choix) {
 		                case 1:
 		                	System.out.println("1. Inscrire un nouveau patient");
-		                	System.out.println("2. Ajouter des infos au dossier médical du patient");
+		                	System.out.println("2. Ajouter des antécédents au dossier médical du patient");
 		 		            System.out.println("3. Supprimer un patient");
 		 		            System.out.println("4. Rechercher et consulter un dossier patient");
 		 		            System.out.println("5. Afficher la spécialité dominante d'un dossier médical patient (Bonus)");
@@ -154,24 +154,7 @@ public class Main {
 		                    inscrirePatient();
 		                    break;
 		                case 2:
-		                	System.out.println("2. Ajouter antécédent");
-		                	System.out.println("2. Ajouter consultation");
-		                	System.out.println("2. Ajouter examen médical");
-		                	choix = lireChoix();
-		                	
-		                	switch (choix) {
-			                case 1:
-		                        ajoutAntecedent();
-		                        break;
-		                    case 2:
-		                	    ajoutConsultation();
-		                	    break;
-		                    case 3:
-		                    	ajoutExamen();
-		                    	break;
-		                    default:
-			                    System.out.println("Choix invalide.");
-			            }
+		                    ajouterAntecedent();
 		                    	
 		                case 3:
 		                	supprimerPatient();
@@ -230,6 +213,27 @@ public class Main {
 		              case 5:
 		            	  systeme.exporterDonneesCSV();
 		                  break;
+		              case 6:
+
+		            	  System.out.println("1. Archiver un dossier");
+		 		          System.out.println("2. Désarchiver un dossier");
+		 		          System.out.println("3. Voir la liste des dossiers archivés");
+		 		         choix = lireChoix();
+		 		        switch (choix) {
+		                case 1:
+		                	archiverDossier();
+	                    break;
+	                    case 2:
+	                	    desarchiverDossier();
+	                	break;
+	                    case 3:
+	                    	systeme.afficherDossiersArchives();
+	                	break;
+	                default:
+	                    System.out.println("Choix invalide.");
+	 		           }
+		                 
+		                  
 		              case 0:
 		            	  systeme.seDeconnecter();
 		                	 menuConnexion();
@@ -397,6 +401,51 @@ public class Main {
 			   systeme.modifierConsultation();
 				       
 	    }
+		   
+		   private static void archiverDossier() {
+			    System.out.print("Entrez l'ID du patient à archiver : ");
+			    String patientId = scanner.nextLine();
+
+			    // Appel via singleton
+			    if (systeme.archiverDossier(patientId)) {
+			        System.out.println("Dossier archivé avec succès !");
+			    } else {
+			        System.out.println("Impossible d'archiver ce dossier. Vérifiez votre rôle ou l'état du dossier.");
+			    }
+				       
+	    }
+		  
+		   
+		   private static void desarchiverDossier() {
+		   
+		   System.out.print("Entrez l'ID du patient à désarchiver : ");
+		    String patientId = scanner.nextLine();
+
+		    if (systeme.desarchiverDossier(patientId)) {
+		        System.out.println("Dossier désarchivé avec succès !");
+		    } else {
+		        System.out.println("Impossible de désarchiver ce dossier. Vérifiez votre rôle ou l'état du dossier.");
+		    }
+		   }
+		   
+		   private static void ajouterAntecedent() {
+			   System.out.print("Entrez l'ID du patient : ");
+			    String patientId = scanner.nextLine();
+
+			    MedicalRecord dossier = systeme.getDossierByPatientId(patientId);
+			    if (dossier != null) {
+			        System.out.print("Entrez l'antécédent à ajouter : ");
+			        String type = scanner.nextLine();
+			        System.out.print("Ajouter une courte description : ");
+			        String desc = scanner.nextLine();
+			        System.out.print("La date d'enregistrement de l'antécédent : ");
+			        String date = scanner.nextLine();
+			        dossier.ajouterAntecedent(new MedicalHistory(type, desc, dateEnregistrement));
+			        System.out.println("Antécédent ajouté avec succès !");
+			    } else {
+			        System.out.println("Dossier introuvable !");
+			    }
+		   }
 		
 			
 			

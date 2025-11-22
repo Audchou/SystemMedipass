@@ -1,39 +1,35 @@
 package medipass.entitie;
 
+import java.time.LocalDate;
+
 public class MedicalHistory {
 	
-	    public static final String PATHOLOGIE = "Pathologie";
-	    public static final String INTERVENTION = "Intervention";
-	    public static final String ALLERGIE = "Allergie";
-	   
+	 private String type; // Ex: Pathologie, Allergie, Chirurgie
+	    private String description;
+	    private LocalDate dateEnregistrement;
 
-   
-    private String id;           
-    private String description;  
-    private String type;       
+	    public MedicalHistory(String type, String description, LocalDate dateEnregistrement) {
+	        this.type = type;
+	        this.description = description;
+	        this.dateEnregistrement = dateEnregistrement;
+	    }
 
-    
-    public MedicalHistory(String id, String description, String type) {
-        this.id = id;
-        this.description = description;
-        this.type = type;
-    }
+	    // Getters
+	    public String getType() {
+	        return type;
+	    }
 
- 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+	    public String getDescription() {
+	        return description;
+	    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+	    public LocalDate getDateEnregistrement() {
+	        return dateEnregistrement;
+	    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
-
-    
-    public void afficher() {
-        System.out.println("Antécédent ID : " + id);
-        System.out.println("Type : " + type);
-        System.out.println("Description : " + description);
-    }
+	    @Override
+	    public String toString() {
+	        return "Type: " + type + ", Description: " + description + ", Date: " + dateEnregistrement;
+	    }
 }
 

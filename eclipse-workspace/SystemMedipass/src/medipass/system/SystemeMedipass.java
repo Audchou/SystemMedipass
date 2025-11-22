@@ -17,6 +17,7 @@ import java.util.ArrayList;
 	    private List<Patient> patients;
 	    private List<User> utilisateurs;
 	    private User utilisateurConnecte;
+	    private List<MedicalRecord> dossiers = new ArrayList<>();
 
 	    private SystemeMedipass() {
 	        this.patients = new ArrayList<>();
@@ -33,6 +34,21 @@ import java.util.ArrayList;
 	    
 	    public User getUtilisateurConnecte() {
 	        return utilisateurConnecte;
+	    }
+	    
+	    // Ajouter un dossier à la liste
+	    public void ajouterDossier(MedicalRecord dossier) {
+	        dossiers.add(dossier);
+	    }
+	    
+	    // Méthode pour récupérer un dossier à partir de son ID
+	    public MedicalRecord getDossierByPatientId(String patientId) {
+	        for (MedicalRecord dossier : dossiers) {
+	            if (dossier.getPatientId().equals(patientId)) {
+	                return dossier; // dossier trouvé+-
+	            }
+	        }
+	        return null; // si le dossier est introuvable
 	    }
 	
 	
@@ -62,7 +78,62 @@ import java.util.ArrayList;
 	        patients.add(p1);
 	        patients.add(p2);
 	 }
+	
+	
+	
+	public boolean archiverDossier(String patientId) {
+	    // Vérifier que l'utilisateur connecté est un médecin
+	    if (!(utilisateurConnecte instanceof HealthPro) || 
+	         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("Médecin")) {
+	        System.out.println("Action non autorisée : seul un médecin peut archiver un dossier.");
+	        return false;
+	    }
+
+	    MedicalRecord dossier = getDossierByPatientId(patientId);
+	    if (dossier != null && !dossier.isArchive()) {
+	        dossier.archiver();
+	        return true;
+	    }
+	    return false;
 	}
+	
+	
+	public boolean desarchiverDossier(String patientId) {
+	    if (!(utilisateurConnecte instanceof HealthPro) || 
+	         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("Médecin")) {
+	        System.out.println("Action non autorisée : seul un médecin peut désarchiver un dossier.");
+	        return false;
+	    }
+
+	    MedicalRecord dossier = getDossierByPatientId(patientId);
+	    if (dossier != null && dossier.isArchive()) {
+	        dossier.desarchiver();
+	        return true;
+	    }
+	    return false;
+	}
+	
+	
+	
+	public void afficherDossiersArchives() {
+	    System.out.println("\n--- Liste des dossiers archivés ---");
+	    boolean aucun = true;
+
+	    for (MedicalRecord dossier : dossiers) {
+	        if (dossier.isArchive()) {
+	            System.out.println(dossier); // utilise toString() de MedicalRecord
+	            aucun = false;
+	        }
+	    }
+
+	    if (aucun) {
+	        System.out.println("Aucun dossier n'est actuellement archivé.");
+	    }
+	}
+
+}
+
+
 
 
 

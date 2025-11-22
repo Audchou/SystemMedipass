@@ -21,6 +21,10 @@ public class MedicalRecord {
     public MedicalRecord(String patientId) {
         this.patientId = patientId;
     }
+      //Methodes d'archivage 
+    public void archiver() { archive = true; }
+    public void desarchiver() { archive = false; }
+
 
     // Méthodes d'ajout (Agrégation)
     public void ajouterAntecedent(MedicalHistory antecedent) { this.antecedents.add(antecedent); }
@@ -32,6 +36,7 @@ public class MedicalRecord {
     public List<Consultation> getConsultations() { return consultations; }
     public List<MedicalExam> getExamens() { return examens; } // NOUVEAU
     public boolean isArchive() { return archive; }
+    public String getPatientId() {return patientId; }
 
     // Logique métier pour la catégorisation
     public String getSpecialiteDominante() {
