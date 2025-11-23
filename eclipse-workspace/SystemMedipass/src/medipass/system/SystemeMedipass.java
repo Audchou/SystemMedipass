@@ -4,9 +4,6 @@ import medipass.entitie.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -228,7 +225,133 @@ import java.util.ArrayList;
 	public Optional<Patient> rechercherPatient(String id) {
         return patients.stream().filter(p -> p.getId().equals(id)).findFirst();
         }
+	
+	
+	    public User seConnecter(String login, String motDePasse) {
+	        for (User u : this.utilisateurs) {
+	            if (u.getLogin().equals(login) && u.verifierMotDePasse(motDePasse)) {
+	                this.utilisateurConnecte = u;
+	                return u;
+	            }
+	        }
+	        return null;
+	    }
+
+	    public void seDeconnecter() {
+	        this.utilisateurConnecte = null;
+	    }
+	    
+	    public void ajouterUtilisateur(User utilisateur) {
+	        if (utilisateurConnecte instanceof Admin) {
+	            this.utilisateurs.add(utilisateur);
+	            System.out.println("Utilisateur " + utilisateur.getNom() + " ajouté.");
+	        } else {
+	            System.out.println("Erreur: Seul un administrateur peut ajouter des utilisateurs.");
+	        }
 	}
+	    
+	    public boolean modifierMotDePasse(String login, String nouveauMotDePasse) {
+	        for (User u : this.utilisateurs) {
+	            if (u.getLogin().equals(login)) {
+	                u.setMotDePasse(nouveauMotDePasse);
+	                return true;
+	            }
+	        }
+	        return false;
+	    }
+	    
+	    public boolean modifierSpecialite(String login, String nouvelleSpecialite) {
+	        for (User u : this.utilisateurs) {
+	            if (u.getLogin().equals(login)) {
+	                if (u instanceof HealthPro) {
+	                    HealthPro healthPro = (HealthPro) u;
+	                    healthPro.setSpecialite(nouvelleSpecialite);
+	                    return true;
+	                }
+	            }
+	        }
+	        return false;
+	    }
+	    
+	    public boolean modifierRole(String login, String nouveauRole, String nouvelleSpecialite) {
+	        User utilisateurAModifier = null;
+
+	        // Chercher l'utilisateur
+	        for (User u : this.utilisateurs) {
+	            if (u.getLogin().equals(login)) {
+	                utilisateurAModifier = u;
+	                break;
+	            }
+	        }
+
+	        if (utilisateurAModifier == null) {
+	            return false; // Utilisateur non trouvé
+	        }
+
+	        // Récupérer le mot de passe actuel
+	        String motDePasseActuel = utilisateurAModifier.getMotDePasse();
+
+	        // Supprimer l'ancien utilisateur de la liste
+	        this.utilisateurs.remove(utilisateurAModifier);
+
+	        User nouveauUtilisateur = null;
+
+	        // Créer un nouvel utilisateur selon le rôle
+	        if (nouveauRole.equalsIgnoreCase("ADMIN")) {
+	            nouveauUtilisateur = new Admin(
+	                utilisateurAModifier.getId(),
+	                utilisateurAModifier.getNom(),
+	                utilisateurAModifier.getPrenom(),
+	                utilisateurAModifier.getDateNaissance(),
+	                login,
+	                motDePasseActuel
+	            );
+	        } else if (nouveauRole.equalsIgnoreCase("MEDECIN") || 
+	                   nouveauRole.equalsIgnoreCase("INFIRMIER") || 
+	                   nouveauRole.equalsIgnoreCase("PHARMACIEN")) {
+	            nouveauUtilisateur = new HealthPro(
+	                utilisateurAModifier.getId(),
+	                utilisateurAModifier.getNom(),
+	                utilisateurAModifier.getPrenom(),
+	                utilisateurAModifier.getDateNaissance(),
+	                login,
+	                motDePasseActuel,
+	                nouveauRole.toUpperCase(),
+	                nouvelleSpecialite != null ? nouvelleSpecialite : ""
+	            );
+	        }
+
+	        if (nouveauUtilisateur != null) {
+	            this.utilisateurs.add(nouveauUtilisateur);
+	            return true; // Rôle modifié avec succès
+	        }
+
+	        return false; // Rôle invalide ou échec
+	    }
+	    
+
+	    public boolean supprimerUtilisateur(String login) {
+	        User utilisateurASupprimer = null;
+
+	        for (User u : this.utilisateurs) {
+	            if (u.getLogin().equals(login)) {
+	                utilisateurASupprimer = u;
+	                break;
+	            }
+	        }
+
+	        if (utilisateurASupprimer == null) return false; // Utilisateur non trouvé
+	        if (utilisateurASupprimer.equals(utilisateurConnecte)) return false; // Ne peut pas supprimer soi-même
+
+	        this.utilisateurs.remove(utilisateurASupprimer);
+	        return true;
+	    }
+
+
+
+
+}
+
 
 
 

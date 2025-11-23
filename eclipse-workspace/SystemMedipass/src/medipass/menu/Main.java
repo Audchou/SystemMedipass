@@ -89,8 +89,8 @@ public class Main {
 		            switch (choix) {
 		                case 1:
 		                	System.out.println("1. Ajouter un utilisateur");
-		                	System.out.println("1. Modifier un utilisateur");
-		 		            System.out.println("2. Supprimer un utilisateur");
+		                	System.out.println("2. Modifier un utilisateur");
+		 		            System.out.println("3. Supprimer un utilisateur");
 		 		            System.out.print("Votre choix: ");
 		 		            choix = lireChoix();
 		 		           switch (choix) {
@@ -98,7 +98,23 @@ public class Main {
 			                	ajouterUtilisateur();
 		                    break;
 			                case 2:
-			                	modifierUtilisateur();
+			                	System.out.println("1. Modifier mot de passe");
+			                	System.out.println("2. Modifier spécialité");
+			                	System.out.println("3. Modifier rôle");
+			                	choix = lireChoix();
+			                	
+			                switch (choix) {
+			                case 1:
+			                	modifierMotDePasse();
+			                	break;
+			                case 2:
+			                	modifierSpecialite();
+			                	break;
+			                case 3:
+			                	modifierRole();
+			                	default:
+			                		 System.out.println("Choix invalide.");
+			                }
 		                    break;
 		                    case 3:
 		                    	supprimerUtilisateur();
@@ -420,19 +436,49 @@ public class Main {
 		    	    }
 		    	}
 
-		    
-		    
-		    private static void modifierUtilisateur() {
-		    	systeme.modifierUtilisateur();
+	         private static void modifierMotDePasse() {
+	        	 
+	        	System.out.print("Login de l'utilisateur à modifier: ");
+	        	    String login = scanner.nextLine();
+		    	System.out.print("Nouveau mot de passe: ");
+	            String mdp = scanner.nextLine();
+	            if (systeme.modifierMotDePasse(login, mdp)) {
+	                System.out.println("Mot de passe modifié !");
+	            } else {
+	                System.out.println("Erreur : utilisateur non trouvé.");
+	            }
 		    }
 		    
-		    private static void supprimerUtilisateur() {
-		    	systeme.supprimerUtilisateu();
+		    private static void modifierSpecialite() {
+		    	
+		    	System.out.print("Login de l'utilisateur à modifier: ");
+        	    String login = scanner.nextLine();
+		    	System.out.print("Nouvelle spécialité: ");
+	            String specialite = scanner.nextLine();
+	            if (systeme.modifierSpecialite(login, specialite)) {
+	                System.out.println("Spécialité modifiée !");
+	            } else {
+	                System.out.println("Erreur : utilisateur non trouvé ou pas un professionnel de santé.");
+	            }
 		    }
 		    
-		    private static void supprimerPatient() {
-		    	systeme.supprimerPatient();
-		    }
+		    private static void modifierRole() {
+
+		    	System.out.print("Login de l'utilisateur à modifier: ");
+        	    String login = scanner.nextLine();
+		    	 System.out.print("Nouveau rôle (ADMIN, MEDECIN, INFIRMIER, PHARMACIEN): ");
+		            String role = scanner.nextLine();
+		            System.out.print("Nouvelle spécialité (si pro santé) : ");
+		            String specialite = scanner.nextLine();
+		            if (systeme.modifierRole(login, role, specialite)) {
+		                System.out.println("Rôle modifié !");
+		            } else {
+		                System.out.println("Erreur : modification impossible.");
+		            }
+		        }
+		       
+		    
+		    
 				        
 			private static void modifierPrescription() {
 				systeme.modifierPrescription();
@@ -511,8 +557,6 @@ public class Main {
 			    }
 		   }
 		
-			
-			
 		        private static int lireChoix() {
 			        try {
 			            return Integer.parseInt(scanner.nextLine());
@@ -521,6 +565,27 @@ public class Main {
 			        }
 			        
 		    }
+		        
+		        private static void supprimerUtilisateur() {
+		
+		            System.out.print("Login de l'utilisateur à supprimer: ");
+		            String login = scanner.nextLine();
+
+		            System.out.print("Êtes-vous sûr de vouloir supprimer cet utilisateur ? (oui/non): ");
+		            String confirmation = scanner.nextLine();
+
+		            if (confirmation.equalsIgnoreCase("oui")) {
+		                boolean succes = systeme.supprimerUtilisateur(login);
+		                if (succes) {
+		                    System.out.println("Utilisateur supprimé avec succès.");
+		                } else {
+		                    System.out.println("Erreur : utilisateur introuvable ou suppression impossible (peut-être vous-même).");
+		                }
+		            } else {
+		                System.out.println("Suppression annulée.");
+		            }
+		        }
+
 		        
 		}
 		
