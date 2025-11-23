@@ -2,6 +2,11 @@ package medipass.system;
 
 import medipass.entitie.*;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +23,7 @@ import java.util.ArrayList;
 	    private List<User> utilisateurs;
 	    private User utilisateurConnecte;
 	    private List<MedicalRecord> dossiers = new ArrayList<>();
+	    private List<Consultation> consultations = new ArrayList<>();
 
 	    private SystemeMedipass() {
 	        this.patients = new ArrayList<>();
@@ -130,8 +136,99 @@ import java.util.ArrayList;
 	        System.out.println("Aucun dossier n'est actuellement archivé.");
 	    }
 	}
+	
+	
+		
+	
+	    // creerConsultation
+	    public void creerConsultation(String id, LocalDateTime date, String motif,
+	                                          String observations, HealthPro professionnel, Patient patient) {
+	    	 if (!(utilisateurConnecte instanceof HealthPro)) {
+	    		 throw new IllegalArgumentException("Erreur: Seul un professionnel de santé peut créer une consultation.");
+	    	 }
+	             
+	    	 HealthPro pro = (HealthPro) utilisateurConnecte;
+	             String consultId = "C" + (patient.getDossier().getConsultations().size() + 1);
 
-}
+	        boolean occupe = consultations.stream()
+	                .anyMatch(c -> c.getProfessionnel().getId().equals(professionnel.getId())
+	                        && c.getDate().equals(date));
+
+	        if (occupe) {
+	            throw new IllegalArgumentException("Le professionnel n'est pas disponible à cette date.");
+	        }
+
+	        Consultation c = new Consultation(consultId, date, motif, observations, pro, patient);
+	        consultations.add(c);
+	        patient.getDossier().ajouterConsultation(c);
+	        System.out.println("Consultation créée pour le patient " + patient.getNom() + " par Dr. " + pro.getNom());
+	    }
+	    	    
+
+	    // modifierConsultation()
+	    public void modifierConsultation(String id, LocalDateTime nouvelleDate,
+	                                             String nouveauMotif, String nouvellesObservations) {
+	    	 // On cherche la consultation à modifier
+	        Consultation ancienne = consultations.stream()
+	                .filter(c -> c.getId().equals(id))
+	                .findFirst()
+	                .orElse(null);
+
+	        if (ancienne == null) {
+	        	System.out.println("Aucune conultation trouvée");
+	        }
+	     // On vérifie si la nouvelle date est occupée par le même professionnel
+	        if (nouvelleDate != null && !nouvelleDate.equals(ancienne.getDate())) {
+	            boolean occupe = consultations.stream()
+	            		 .anyMatch(c ->
+	                     c.getProfessionnel().equals(ancienne.getProfessionnel()) &&
+	                     c.getDate().equals(nouvelleDate) &&
+	                     !c.getId().equals(id)
+	             );
+
+	            if (occupe) {
+	                throw new IllegalArgumentException("Le professionnel n'est pas disponible à la nouvelle date.");
+	            }
+	        }
+	     // On crée la consultation modifiée
+	        Consultation cModifiee = new Consultation(
+	                ancienne.getId(),
+	                nouvelleDate != null ? nouvelleDate : ancienne.getDate(),
+	                nouveauMotif != null ? nouveauMotif : ancienne.getMotif(),
+	                nouvellesObservations != null ? nouvellesObservations : ancienne.getObservations(),
+	                ancienne.getProfessionnel(),
+	                ancienne.getPatient()
+	        );
+
+	        int index = consultations.indexOf(ancienne);
+	        consultations.set(index, cModifiee);
+	        
+	        
+	        // Mettre à jour la liste du dossier médical du patient
+	        Patient patient = ancienne.getPatient();
+	        List<Consultation> dossierConsults = patient.getDossier().getConsultations();
+	        int indexDossier = dossierConsults.indexOf(ancienne);
+	        if (indexDossier != -1) {
+	            dossierConsults.set(indexDossier, cModifiee);
+	        }
+
+	        System.out.println("Consultation modifiée avec succès !");
+	         
+	    }
+
+	    // consultationParSpecialite()
+	    public List<Consultation> consultationParSpecialite(String specialite) {
+	        return consultations.stream()
+	                .filter(c -> c.getProfessionnel().getSpecialite() != null &&
+	                		c.getProfessionnel().getSpecialite().equalsIgnoreCase(specialite))
+	                .collect(Collectors.toList());
+	    }
+	
+
+	public Optional<Patient> rechercherPatient(String id) {
+        return patients.stream().filter(p -> p.getId().equals(id)).findFirst();
+        }
+	}
 
 
 

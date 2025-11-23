@@ -1,12 +1,13 @@
 package medipass.menu;
 
 import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import java.util.Scanner;
 import medipass.system.SystemeMedipass;
+import java.util.List;
 
 import medipass.entitie.*;
 
@@ -135,7 +136,7 @@ public class Main {
 		            System.out.println("4. Ajouter un examen médical (Bonus)");
 		            System.out.println("5. Exporter les données (CSV - Bonus)");
 		            System.out.println("6. Gestionnaire d'archives(Bonus)");
-		            System.out.println("0. Déconnexion");
+		            System.out.println("0. Déconexion");
 		            System.out.print("Votre choix: ");
 		            choix = lireChoix();
 		           
@@ -329,12 +330,37 @@ public class Main {
 		        Patient patient = trouverPatient();
 		        if (patient == null) return;
 
+		        System.out.print("ID de la consultation (ex: C001): ");
+		        String consultId = scanner.nextLine();    
+		        String observations = scanner.nextLine();
 		        System.out.print("Motif de la consultation: ");
 		        String motif = scanner.nextLine();
-		        System.out.print("Observations: ");
-		        String observations = scanner.nextLine();
+                System.out.print("Observations: ");
+		        
 
-		        systeme.creerConsultation(patient, motif, observations);
+		        System.out.print("Date de la consultation (yyyy-MM-dd HH:mm): ");
+		        String dateStr = scanner.nextLine();
+		        LocalDateTime date;
+		        try {
+		            date = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+		        } catch (DateTimeParseException e) {
+		            System.out.println("Format de date invalide !");
+		            return;
+		        }
+
+		        // Étape 3 : récupérer le pro connecté
+		        if (!(systeme.getUtilisateurConnecte() instanceof HealthPro)) {
+		            System.out.println("Erreur : Seul un professionnel de santé peut créer une consultation.");
+		            return;
+		        }
+		        HealthPro pro = (HealthPro) systeme.getUtilisateurConnecte();
+
+		        // Étape 4 : appeler la méthode centrale dans SystemeMedipass
+		        try {
+		            systeme.creerConsultation(consultId,date, motif, observations, pro, patient);
+		        } catch (IllegalArgumentException e) {
+		            System.out.println(e.getMessage());
+		        }
 		    }
 		    
 		    private static void creerPrescription() {
@@ -378,7 +404,23 @@ public class Main {
 		    }
 		        
 		    private static void consultationsParSpecialite() {
-		    }
+		    	
+		    	    System.out.print("Entrez la spécialité recherchée: ");
+		    	    String specialite = scanner.nextLine();
+
+		    	    List<Consultation> liste = systeme.consultationParSpecialite(specialite);
+
+		    	    if (liste.isEmpty()) {
+		    	        System.out.println("Aucune consultation trouvée pour cette spécialité.");
+		    	    } else {
+		    	        System.out.println("--- Consultations pour la spécialité " + specialite + " ---");
+		    	        for (Consultation c : liste) {
+		    	            System.out.println(c);
+		    	        }
+		    	    }
+		    	}
+
+		    
 		    
 		    private static void modifierUtilisateur() {
 		    	systeme.modifierUtilisateur();
@@ -397,10 +439,33 @@ public class Main {
 					       
 		    }
 	        
-		   private static void modifierConsultation() {
-			   systeme.modifierConsultation();
-				       
-	    }
+			private static void modifierConsultation() {
+			    System.out.print("ID de la consultation à modifier : ");
+			    String id = scanner.nextLine();
+
+			    System.out.print("Nouvelle date (yyyy-MM-dd HH:mm) ou ENTER pour garder l'ancienne : ");
+			    String dateStr = scanner.nextLine();
+			    LocalDateTime nouvelleDate = dateStr.isEmpty() ? null :
+			        LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+			    System.out.print("Nouveau motif ou ENTER pour garder l'ancien : ");
+			    String nouveauMotif = scanner.nextLine();
+			    if (nouveauMotif.isEmpty()) nouveauMotif = null;
+
+			    System.out.print("Nouvelles observations ou ENTER pour garder l'ancien : ");
+			    String nouvellesObservations = scanner.nextLine();
+			    if (nouvellesObservations.isEmpty()) nouvellesObservations = null;
+
+			    try {
+			        systeme.modifierConsultation(id, nouvelleDate, nouveauMotif, nouvellesObservations);
+			        System.out.println("Consultation modifiée avec succès !");
+			    } catch (IllegalArgumentException e) {
+			        System.out.println("Erreur : " + e.getMessage());
+			    }
+			}
+			
+
+		   
 		   
 		   private static void archiverDossier() {
 			    System.out.print("Entrez l'ID du patient à archiver : ");
