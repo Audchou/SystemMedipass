@@ -35,6 +35,11 @@ public abstract class User extends Personne {
         this.motDePasse = motDePasse;
     }
 
+    // Getter pour mot de passe (nécessaire pour la modification de rôle)
+    public String getMotDePasse() {
+        return motDePasse;
+    }
+
     @Override
     public String toString() {
         return super.toString() + ", Rôle: " + role + ", Login: " + login;

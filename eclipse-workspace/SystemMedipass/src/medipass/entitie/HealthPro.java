@@ -17,6 +17,10 @@ public class HealthPro  extends User {
 	        return specialite;
 	    }
 
+	    public void setSpecialite(String specialite) {
+	        this.specialite = specialite;
+	    }
+
 	    // Logique métier: un professionnel peut prescrire
 	    public void prescrire(Patient patient, Prescription prescription) {
 	        if (patient != null && patient.getDossier() != null) {
