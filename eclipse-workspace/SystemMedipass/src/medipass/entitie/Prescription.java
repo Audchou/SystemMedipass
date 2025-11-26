@@ -3,13 +3,17 @@ package medipass.entitie;
 import java.time.LocalDate;
 
 public class Prescription {
+	 private static int compteur = 1;
+
+	private String id;
     private String medicament;
     private String posologie;
     private int dureeJours;
     private LocalDate dateEmission;
 
-    public Prescription(String medicament, String posologie, int dureeJours) {
-        this.medicament = medicament;
+    public Prescription(String id, String medicament, String posologie, int dureeJours) {
+    	 this.id = "PR" + (compteur++);   
+    	this.medicament = medicament;
         this.posologie = posologie;
         this.dureeJours = dureeJours;
         this.dateEmission = LocalDate.now();
@@ -19,6 +23,15 @@ public class Prescription {
     public String getMedicament() {
         return medicament;
     }
+    
+    public String getId() {
+        return id;
+    }
+   
+    public void setId(String id) {
+        this.id = id;
+    }
+
 
     public String getPosologie() {
         return posologie;

@@ -10,19 +10,15 @@ import medipass.system.SystemeMedipass;
 import java.util.List;
 
 import medipass.entitie.*;
-import medipass.service.StatsService;
-import medipass.service.PatientService;
-import medipass.service.PrescriptionService;
+
 
 
 public class Main {
 	 private static SystemeMedipass systeme = SystemeMedipass.getInstance();
 	  private static Scanner scanner = new Scanner(System.in);
 	 private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-	
+	 
 
-	
-	
 	public static void main(String[] args) {
 		 System.out.println("===================================================");
 	        System.out.println("  Système d'Information Médical Medipass (Console) ");
@@ -38,7 +34,6 @@ public class Main {
 		    
                 if (choix == 1) {
 		        System.out.println("Super, tu choisis de te connecter !");
-		        // Méthode connexion
 	            menuConnexion();
 	    }
 		    else if (choix == 2) {
@@ -78,7 +73,7 @@ public class Main {
 		        while (choix != 0) {
 		        	if (admin != null) {
 		        	    System.out.println("\n--- Menu Administrateur ---");
-		        	    System.out.println("Bienvenue Admin " + admin.getNom());
+		        	    System.out.println("Bienvenue ProSante " + admin.getNom());
 		        	} else {
 		        	    System.out.println("Aucun utilisateur connecté !");
 		        	}
@@ -86,13 +81,14 @@ public class Main {
 		            System.out.println("2. Afficher les statistiques du système");
 		            System.out.println("0. Déconnexion");
 		            System.out.print("Votre choix: ");
-		            choix = lireChoix();
+		            int choixUser = lireChoix();
 
-		            switch (choix) {
+		            switch (choixUser) {
 		                case 1:
 		                	System.out.println("1. Ajouter un utilisateur");
 		                	System.out.println("2. Modifier un utilisateur");
 		 		            System.out.println("3. Supprimer un utilisateur");
+		 		            System.out.println("4. Afficher un utilisateur");
 		 		            System.out.print("Votre choix: ");
 		 		            choix = lireChoix();
 		 		           switch (choix) {
@@ -120,12 +116,15 @@ public class Main {
 		                    break;
 		                    case 3:
 		                    	supprimerUtilisateur();
-		                    break;
+		                        break;
+		                    case 4:
+		                    	afficherUtilisateur();
+		                    	break;
 		                    default:
 			                    System.out.println("Choix invalide.");
 			            }
 		                case 2:
-							StatsService.afficherStatistiques(systeme.getPatients(), systeme.getHealthPros());
+		                	systeme.afficherStatistiques();
 		                	break;
 		                case 0:
 		                	systeme.seDeconnecter();
@@ -156,10 +155,10 @@ public class Main {
 		            System.out.println("6. Gestionnaire d'archives(Bonus)");
 		            System.out.println("0. Déconexion");
 		            System.out.print("Votre choix: ");
-		            choix = lireChoix();
+		            int choixPatient= lireChoix();
 		           
 		           
-		            switch (choix) {
+		            switch (choixPatient) {
 		                case 1:
 		                	System.out.println("1. Inscrire un nouveau patient");
 		                	System.out.println("2. Ajouter des antécédents au dossier médical du patient");
@@ -169,11 +168,12 @@ public class Main {
 		 		            choix = lireChoix();
 
 		 		           switch (choix) {
-			                case 1:
+			            case 1:
 		                    inscrirePatient();
 		                    break;
 		                case 2:
 		                    ajouterAntecedent();
+		                    break;
 		                    	
 		                case 3:
 							supprimerPatient();
@@ -189,14 +189,15 @@ public class Main {
 		                default:
 		                    System.out.println("Choix invalide.");
 		 		           }
+		 		           break;
 		               
-		                case 2:
+		                 case 2:
 		                	System.out.println("1. Créer une nouvelle consultation");
 				            System.out.println("2. Modifier une consultation");
 				            System.out.println("3. Liste des consultations par specialité médicale (Bonus)");
-				            choix = lireChoix();
+				            int choixConsu = lireChoix();
 				            
-				            switch (choix) {
+				            switch (choixConsu) {
 			                case 1:
 			                	creerConsultation();
 		                    break;
@@ -209,13 +210,14 @@ public class Main {
 		                default:
 		                    System.out.println("Choix invalide.");
 		 		           }
+				            break;
 		               
 		              case 3:
-		                  System.out.println("1. Créer une prescription (Bonus)");
-		 		          System.out.println("2. Modifier une prescription (Bonus)");
-		 		         choix = lireChoix();
+		                  System.out.println("1. Créer une prescription");
+		 		          System.out.println("2. Modifier une prescription");
+		 		         int choixPresc = lireChoix();
 				            
-				            switch (choix) {
+				            switch (choixPresc) {
 			                case 1:
 			                	creerPrescription();
 		                    break;
@@ -225,6 +227,7 @@ public class Main {
 		                default:
 		                    System.out.println("Choix invalide.");
 		 		           }
+				            break;
 				            
 		              case 4:
 		            	  ajouterExamen();
@@ -237,8 +240,8 @@ public class Main {
 		            	  System.out.println("1. Archiver un dossier");
 		 		          System.out.println("2. Désarchiver un dossier");
 		 		          System.out.println("3. Voir la liste des dossiers archivés");
-		 		         choix = lireChoix();
-		 		        switch (choix) {
+		 		         int choixArchive = lireChoix();
+		 		        switch (choixArchive) {
 		                case 1:
 		                	archiverDossier();
 	                    break;
@@ -251,6 +254,7 @@ public class Main {
 	                default:
 	                    System.out.println("Choix invalide.");
 	 		           }
+		 		        break;
 		                 
 		                  
 		              case 0:
@@ -322,6 +326,13 @@ public class Main {
 
 		        systeme.ajouterUtilisateur(nouvelUtilisateur);
 		    }
+		    private static void afficherUtilisateur()  {		    
+		    System.out.print("Entrez l'ID de l'utilisateur à rechercher: ");
+		    String id = scanner.nextLine();
+
+		    User user = systeme.rechercherUtilisateur(id);
+		    systeme.afficherUtilisateur(user);
+		    }
 
 		    private static void inscrirePatient() {
 		        System.out.println("\n--- Inscription d'un Patient ---");
@@ -333,9 +344,11 @@ public class Main {
 		        String prenom = scanner.nextLine();
 		        LocalDate dob = lireDate("Date de naissance");
 
-				Patient nouveauPatient = new Patient(id, nom, prenom, dob);
-				PatientService patientService = new PatientService();
-				patientService.ajouterPatient(nouveauPatient);
+		        Patient nouveauPatient = new Patient(id, nom, prenom, dob);
+		        systeme.ajouterPatient(nouveauPatient);
+		        System.out.println("Patient créé avec succès : " + nom + " " + prenom);
+		        
+
 			}
 
 		    private static void consulterDossierPatient() {
@@ -350,22 +363,28 @@ public class Main {
 		        if (patient == null) return;
 
 		        System.out.print("ID de la consultation (ex: C001): ");
-		        String consultId = scanner.nextLine();    
+		        String consultId = scanner.nextLine();
+		        System.out.print("Observations: ");
 		        String observations = scanner.nextLine();
 		        System.out.print("Motif de la consultation: ");
 		        String motif = scanner.nextLine();
-                System.out.print("Observations: ");
+               
 		        
+		        LocalDateTime date = null;
 
-		        System.out.print("Date de la consultation (yyyy-MM-dd HH:mm): ");
-		        String dateStr = scanner.nextLine();
-		        LocalDateTime date;
-		        try {
-		            date = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-		        } catch (DateTimeParseException e) {
-		            System.out.println("Format de date invalide !");
-		            return;
+		        while (true) {
+		            System.out.print("Date de la consultation (yyyy-MM-dd HH:mm): ");
+		            String dateStr = scanner.nextLine();
+
+		            try {
+		                date = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+		                break; // 🎉 Date valide → on sort de la boucle
+		            } catch (DateTimeParseException e) {
+		                System.out.println("❌ Format de date invalide ! Exemple correct : 2025-03-12 14:30");
+		                System.out.println("Veuillez réessayer...\n");
+		            }
 		        }
+
 
 		        // Étape 3 : récupérer le pro connecté
 		        if (!(systeme.getUtilisateurConnecte() instanceof HealthPro)) {
@@ -377,13 +396,14 @@ public class Main {
 		        // Étape 4 : appeler la méthode centrale dans SystemeMedipass
 		        try {
 		            systeme.creerConsultation(consultId,date, motif, observations, pro, patient);
+		            System.out.print("Consultation programmé avec succès"); 
 		        } catch (IllegalArgumentException e) {
 		            System.out.println(e.getMessage());
 		        }
 		    }
 		    
 		    private static void creerPrescription() {
-		        Patient patient = trouverPatient();
+		        Patient patient = trouverPatient(); // Méthode qui retourne le patient sélectionné
 		        if (patient == null) return;
 
 		        System.out.print("Médicament: ");
@@ -393,14 +413,41 @@ public class Main {
 		        System.out.print("Durée (en jours): ");
 		        int duree = lireChoix();
 
-		        if (duree > 0) {
-		            Prescription prescription = new Prescription(medicament, posologie, duree);
-		            // Le professionnel de santé connecté est utilisé pour prescrire
-		            ((HealthPro) systeme.getUtilisateurConnecte()).prescrire(patient, prescription);
+		        Prescription prescription = systeme.creerPrescription(patient, medicament, posologie, duree);
+
+		        if (prescription != null) {
+		            System.out.println("Prescription créée avec l'ID : " + prescription.getId());
 		        } else {
-		            System.out.println("Durée invalide.");
+		            System.out.println("Erreur lors de la création de la prescription.");
 		        }
 		    }
+
+		    
+		   
+		    	private static void modifierPrescription() {
+		    	    Patient patient = trouverPatient();
+		    	    if (patient == null) return;
+
+		    	    System.out.print("Entrez l'ID de la prescription à modifier : ");
+		    	    String prescriptionId = scanner.nextLine();
+
+		    	    System.out.print("Nouveau médicament (ENTER pour conserver) : ");
+		    	    String medicament = scanner.nextLine();
+		    	    System.out.print("Nouvelle posologie (ENTER pour conserver) : ");
+		    	    String posologie = scanner.nextLine();
+		    	    System.out.print("Nouvelle durée (0 pour conserver) : ");
+		    	    int duree = lireChoix();
+
+		    	    boolean succes = systeme.modifierPrescription(prescriptionId, patient, medicament, posologie, duree);
+
+		    	    if (succes) {
+		    	        System.out.println("Prescription modifiée avec succès !");
+		    	    } else {
+		    	        System.out.println("Prescription introuvable !");
+		    	    }
+		    	}
+
+
 
 		    private static void ajouterExamen() {
 		        Patient patient = trouverPatient();
@@ -408,10 +455,12 @@ public class Main {
 
 		        System.out.print("Type d'examen (ex: Radio, Analyse de sang): ");
 		        String type = scanner.nextLine();
+		        System.out.print("Demandeur: ");
+		        String demandeur = scanner.nextLine();
 		        System.out.print("Résultat de l'examen: ");
 		        String resultat = scanner.nextLine();
 
-				systeme.ajouterExamen(patient, type, resultat);
+				systeme.ajouterExamen(patient, type, resultat, demandeur);
 		    }
 
 		    private static void afficherSpecialiteDominante() {
@@ -481,13 +530,8 @@ public class Main {
 		        }
 		       
 		    
+		   
 		    
-				        
-			private static void modifierPrescription() {
-				PrescriptionService.modifierPrescription();
-					       
-		    }
-	        
 			private static void modifierConsultation() {
 			    System.out.print("ID de la consultation à modifier : ");
 			    String id = scanner.nextLine();
@@ -528,6 +572,27 @@ public class Main {
 			    }
 				       
 	    }
+		   
+		   private static void supprimerPatient() {
+			   System.out.print("Entrez l'ID du patient à supprimer : ");
+			   String id = scanner.nextLine();
+
+			   // étape 1 : retrouver le patient
+			   Patient patient = systeme.rechercherPatient(id).orElse(null);
+
+
+			   if (patient == null) {
+			       System.out.println("Patient inexistant !");
+			   } else {
+			       // étape 2 : supprimer
+			       if (systeme.supprimerPatient(patient)) {
+			           System.out.println("Patient supprimé avec succès.");
+			       } else {
+			           System.out.println("Erreur : impossible de supprimer ce patient.");
+			       }
+			   }
+
+	    }
 		  
 		   
 		   private static void desarchiverDossier() {
@@ -543,22 +608,31 @@ public class Main {
 		   }
 		   
 		   private static void ajouterAntecedent() {
-			   System.out.print("Entrez l'ID du patient : ");
+			    System.out.print("Entrez l'ID du patient : ");
 			    String patientId = scanner.nextLine();
 
-			    MedicalRecord dossier = systeme.getDossierByPatientId(patientId);
-			    if (dossier != null) {
-			        System.out.print("Entrez l'antécédent à ajouter : ");
-			        String type = scanner.nextLine();
-			        System.out.print("Ajouter une courte description : ");
-			        String desc = scanner.nextLine();
-			        MedicalHistory antecedent = new MedicalHistory(type, desc);
-			        dossier.ajouterAntecedent(antecedent);
+			  
+			    Patient patient = systeme.rechercherPatient(patientId).orElse(null); // 
+			    if (patient == null) {
+			        System.out.println("Patient introuvable !");
+			        return;
+			    }
+
+			  
+			    System.out.print("Entrez l'antécédent à ajouter : ");
+			    String type = scanner.nextLine();
+			    System.out.print("Ajouter une courte description : ");
+			    String description = scanner.nextLine();
+
+			    
+			    boolean ok = systeme.ajouterAntecedent(patient, type, description);
+			    if (ok) {
 			        System.out.println("Antécédent ajouté avec succès !");
 			    } else {
-			        System.out.println("Dossier introuvable !");
+			        System.out.println("Impossible d'ajouter l'antécédent.");
 			    }
-		   }
+			}
+
 		
 				private static int lireChoix() {
 					try {
@@ -589,26 +663,11 @@ public class Main {
 					}
 				}
 
-				// Ajout de la méthode supprimerPatient
-				private static void supprimerPatient() {
-					System.out.print("Entrez l'ID du patient à supprimer : ");
-					String patientId = scanner.nextLine();
-					System.out.print("Êtes-vous sûr de vouloir supprimer ce patient ? (oui/non): ");
-					String confirmation = scanner.nextLine();
-					if (confirmation.equalsIgnoreCase("oui")) {
-						boolean succes = PatientService.supprimerPatient();
-						if (succes) {
-							System.out.println("Patient supprimé avec succès.");
-						} else {
-							System.out.println("Erreur : patient introuvable ou suppression impossible.");
-						}
-					} else {
-						System.out.println("Suppression annulée.");
-					}
-				}
+				
+	}
 		
 				
-		}
+	
 		
 
 	

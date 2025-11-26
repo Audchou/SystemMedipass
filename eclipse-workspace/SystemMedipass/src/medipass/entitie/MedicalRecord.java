@@ -37,6 +37,7 @@ public class MedicalRecord {
     public List<MedicalExam> getExamens() { return examens; } // NOUVEAU
     public boolean isArchive() { return archive; }
     public String getPatientId() {return patientId; }
+    public List<Prescription> getPrescriptions() {return prescriptions;}
 
     // Logique métier pour la catégorisation
     public String getSpecialiteDominante() {

@@ -82,12 +82,67 @@ import java.util.ArrayList;
 	        patients.add(p2);
 	 }
 	
+	 public boolean ajouterPatient(Patient patient) {
+		 for (Patient p : patients) {
+		        if (p.getId().equals(patient.getId())) {
+		            System.out.println("Erreur : un patient avec cet ID existe déjà !");
+		            return false;
+		        }
+		 }
+	        this.patients.add(patient);
+	        dossiers.add(new MedicalRecord(patient.getId()));
+		 return true;
+	 }
 	
-	
+	 public boolean supprimerPatient(Patient patient) {
+		    return this.patients.remove(patient);
+		}
+	 
+	 public Prescription creerPrescription(Patient patient, String medicament, String posologie, int duree) {
+		    if (patient == null) return null;
+		    String prescriptionId = "P" + (patient.getDossier().getPrescriptions().size() + 1);
+		    Prescription prescription = new Prescription(prescriptionId, medicament, posologie, duree);
+
+		    patient.getDossier().ajouterPrescription(prescription);
+
+		    return prescription;
+		}
+
+	 
+	 public boolean modifierPrescription(String prescriptionId, Patient patient, String nouveauMedicament,
+             String nouvellePosologie, int nouvelleDuree) {
+         if (patient == null) return false;
+
+        Optional<Prescription> opt = patient.getDossier().getPrescriptions().stream()
+                  .filter(p -> p.getId().equals(prescriptionId))
+                  .findFirst();
+        if (!opt.isPresent()) return false;
+
+     Prescription p = opt.get();
+        if (nouveauMedicament != null && !nouveauMedicament.isEmpty()) p.setMedicament(nouveauMedicament);
+        if (nouvellePosologie != null && !nouvellePosologie.isEmpty()) p.setPosologie(nouvellePosologie);
+        if (nouvelleDuree > 0) p.setDuree(nouvelleDuree);
+
+            return true;
+}
+  
+
 	public boolean archiverDossier(String patientId) {
+		 System.out.println("DEBUG → Type utilisateur connecté : " 
+			        + utilisateurConnecte.getClass().getSimpleName());
+			    if (utilisateurConnecte instanceof HealthPro) {
+			        System.out.println("DEBUG → Rôle : " 
+			            + ((HealthPro) utilisateurConnecte).getRole());
+			    } else {
+			        System.out.println("DEBUG → Ce n'est PAS un HealthPro");
+			    }
+			    for (MedicalRecord dossier : dossiers) {
+			        System.out.println("DEBUG dossier présent → " + dossier.getPatientId());
+			    }
+
 	    // Vérifier que l'utilisateur connecté est un médecin
 	    if (!(utilisateurConnecte instanceof HealthPro) || 
-	         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("Médecin")) {
+	         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("MEDECIN")) {
 	        System.out.println("Action non autorisée : seul un médecin peut archiver un dossier.");
 	        return false;
 	    }
@@ -135,7 +190,6 @@ import java.util.ArrayList;
 	}
 	
 	
-		
 	
 	    // creerConsultation
 	    public void creerConsultation(String id, LocalDateTime date, String motif,
@@ -164,54 +218,55 @@ import java.util.ArrayList;
 
 	    // modifierConsultation()
 	    public void modifierConsultation(String id, LocalDateTime nouvelleDate,
-	                                             String nouveauMotif, String nouvellesObservations) {
-	    	 // On cherche la consultation à modifier
-	        Consultation ancienne = consultations.stream()
-	                .filter(c -> c.getId().equals(id))
-	                .findFirst()
-	                .orElse(null);
+                String nouveauMotif, String nouvellesObservations) {
+       // On cherche la consultation à modifier
+      Consultation ancienne = consultations.stream()
+                   .filter(c -> c.getId().equals(id))
+                   .findFirst()
+                   .orElse(null);
 
-	        if (ancienne == null) {
-	        	System.out.println("Aucune conultation trouvée");
-	        }
-	     // On vérifie si la nouvelle date est occupée par le même professionnel
-	        if (nouvelleDate != null && !nouvelleDate.equals(ancienne.getDate())) {
-	            boolean occupe = consultations.stream()
-	            		 .anyMatch(c ->
-	                     c.getProfessionnel().equals(ancienne.getProfessionnel()) &&
-	                     c.getDate().equals(nouvelleDate) &&
-	                     !c.getId().equals(id)
-	             );
+          if (ancienne == null) {
+                 System.out.println("Aucune consultation trouvée pour l'ID : " + id);
+                  return; // STOP si consultation introuvable
+ }
 
-	            if (occupe) {
-	                throw new IllegalArgumentException("Le professionnel n'est pas disponible à la nouvelle date.");
-	            }
-	        }
-	     // On crée la consultation modifiée
-	        Consultation cModifiee = new Consultation(
-	                ancienne.getId(),
-	                nouvelleDate != null ? nouvelleDate : ancienne.getDate(),
-	                nouveauMotif != null ? nouveauMotif : ancienne.getMotif(),
-	                nouvellesObservations != null ? nouvellesObservations : ancienne.getObservations(),
-	                ancienne.getProfessionnel(),
-	                ancienne.getPatient()
-	        );
+       // Vérifie si la nouvelle date est occupée par le même professionnel
+         if (nouvelleDate != null && !nouvelleDate.equals(ancienne.getDate())) {
+     boolean occupe = consultations.stream()
+              .anyMatch(c ->
+              c.getProfessionnel().equals(ancienne.getProfessionnel()) &&
+              c.getDate().equals(nouvelleDate) &&
+             !c.getId().equals(id));
 
-	        int index = consultations.indexOf(ancienne);
-	        consultations.set(index, cModifiee);
-	        
-	        
-	        // Mettre à jour la liste du dossier médical du patient
-	        Patient patient = ancienne.getPatient();
-	        List<Consultation> dossierConsults = patient.getDossier().getConsultations();
-	        int indexDossier = dossierConsults.indexOf(ancienne);
-	        if (indexDossier != -1) {
-	            dossierConsults.set(indexDossier, cModifiee);
-	        }
+        if (occupe) {
+                System.out.println("Le professionnel n'est pas disponible à la nouvelle date.");
+                  return; 
+                  }
+ }
 
-	        System.out.println("Consultation modifiée avec succès !");
-	         
-	    }
+           // Crée la consultation modifiée
+           Consultation cModifiee = new Consultation(ancienne.getId(),
+               nouvelleDate != null ? nouvelleDate : ancienne.getDate(),
+               nouveauMotif != null && !nouveauMotif.isBlank() ? nouveauMotif : ancienne.getMotif(),
+               nouvellesObservations != null && !nouvellesObservations.isBlank() ? nouvellesObservations : ancienne.getObservations(),
+               ancienne.getProfessionnel(),
+               ancienne.getPatient());
+
+          // Remplacer dans la liste des consultations
+      int index = consultations.indexOf(ancienne);
+       consultations.set(index, cModifiee);
+
+// Mettre à jour la liste du dossier médical du patient
+          Patient patient = ancienne.getPatient();
+           List<Consultation> dossierConsults = patient.getDossier().getConsultations();
+     int indexDossier = dossierConsults.indexOf(ancienne);
+      if (indexDossier != -1) {
+          dossierConsults.set(indexDossier, cModifiee);
+ }
+
+       System.out.println("Consultation modifiée avec succès !");
+ }
+
 
 	    // consultationParSpecialite()
 	    public List<Consultation> consultationParSpecialite(String specialite) {
@@ -225,6 +280,26 @@ import java.util.ArrayList;
 	public Optional<Patient> rechercherPatient(String id) {
         return patients.stream().filter(p -> p.getId().equals(id)).findFirst();
         }
+	
+	public Optional<Prescription> rechercherPrescription(String id) {
+	    return patients.stream()
+	        .filter(p -> p.getDossier() != null)   
+	        .flatMap(p -> p.getDossier().getPrescriptions().stream())
+	        .filter(presc -> presc.getId() != null && presc.getId().equalsIgnoreCase(id))
+	        .findFirst();
+	}
+	
+	
+
+	public boolean ajouterAntecedent(Patient patient, String type, String description) {
+	    if (patient == null) return false;
+	    MedicalRecord dossier = patient.getDossier();
+	    if (dossier == null) return false;
+	    MedicalHistory antecedent = new MedicalHistory(type, description);
+	    dossier.ajouterAntecedent(antecedent);
+	    return true;
+	}
+
 	
 	
 	    public User seConnecter(String login, String motDePasse) {
@@ -241,14 +316,51 @@ import java.util.ArrayList;
 	        this.utilisateurConnecte = null;
 	    }
 	    
-	    public void ajouterUtilisateur(User utilisateur) {
+	    public boolean ajouterUtilisateur(User utilisateur) {
+	    	 if(utilisateur == null) return false;
+	    	 boolean idExiste = utilisateurs.stream()
+                     .anyMatch(u -> u.getId().equals(utilisateur.getId()));
+
+            if(idExiste) {
+                System.out.println("Erreur : un utilisateur avec cet ID existe déjà !");
+                   return false;
+}
 	        if (utilisateurConnecte instanceof Admin) {
 	            this.utilisateurs.add(utilisateur);
 	            System.out.println("Utilisateur " + utilisateur.getNom() + " ajouté.");
 	        } else {
 	            System.out.println("Erreur: Seul un administrateur peut ajouter des utilisateurs.");
 	        }
+	        return true;
 	}
+	    
+	    public void afficherUtilisateur(User u) {
+	        if (u == null) {
+	            System.out.println("Utilisateur introuvable !");
+	            return;
+	        }
+	        System.out.println("ID: " + u.getId());
+	        System.out.println("Nom: " + u.getNom());
+	        System.out.println("Prénom: " + u.getPrenom());
+	        System.out.println("Date de naissance: " + u.getDateNaissance());
+	        System.out.println("Login: " + u.getLogin());
+
+	        if (u instanceof HealthPro hp) {
+	            System.out.println("Rôle: " + hp.getRole());
+	            System.out.println("Spécialité: " + hp.getSpecialite());
+	        } else if (u instanceof Admin) {
+	            System.out.println("Rôle: ADMIN");
+	        }
+	    }
+	    public User rechercherUtilisateur(String id) {
+	        for (User u : utilisateurs) {
+	            if (u.getId().equals(id)) {
+	                return u;
+	            }
+	        }
+	        return null; // si aucun utilisateur trouvé
+	    }
+
 	    
 	    public boolean modifierMotDePasse(String login, String nouveauMotDePasse) {
 	        for (User u : this.utilisateurs) {
@@ -293,7 +405,7 @@ import java.util.ArrayList;
 
 	        // Supprimer l'ancien utilisateur de la liste
 	        this.utilisateurs.remove(utilisateurAModifier);
-
+	        
 	        User nouveauUtilisateur = null;
 
 	        // Créer un nouvel utilisateur selon le rôle
@@ -362,20 +474,60 @@ import java.util.ArrayList;
 			}
 			return healthPros;
 		}
+		
+		 // --- Fonctionnalités Statistiques ---
 
-        public void exporterDonneesCSV() {
-            throw new UnsupportedOperationException("Unimplemented method 'exporterDonneesCSV'");
-        }
+	    public void afficherStatistiques() {
+	        System.out.println("\n--- Statistiques du Système Medipass ---");
+	        System.out.println("Nombre total de patients: " + patients.size());
+	        System.out.println("Nombre total d'utilisateurs: " + utilisateurs.size());
 
-        public void ajouterExamen(Patient patient, String type, String resultat) {
-			
-            throw new UnsupportedOperationException("Unimplemented method 'ajouterExamen'");
-        }
+	        long nbProSante = utilisateurs.stream()
+	            .filter(u -> u instanceof HealthPro)
+	            .count();
+	        System.out.println("Nombre de professionnels de santé: " + nbProSante);
+
+	        long totalConsultations = patients.stream()
+	            .mapToLong(p -> p.getDossier().getConsultations().size())
+	            .sum();
+	        System.out.println("Nombre total de consultations enregistrées: " + totalConsultations);
+	        
+	        long totalExamens = patients.stream()
+	            .mapToLong(p -> p.getDossier().getExamens().size())
+	            .sum();
+	        System.out.println("Nombre total d'examens enregistrés: " + totalExamens);
+	        System.out.println("----------------------------------------\n");
+	    }
+
+		  // --- Fonctionnalités Bonus ---
+	    
+	    public void exporterDonneesCSV() {
+	        ExportCSV.exporterPatients(patients);
+	        ExportCSV.exporterUtilisateurs(utilisateurs);
+	    }
+	    
+	    public void ajouterExamen(Patient patient, String type, String resultat, String demandeur) {
+	        if (utilisateurConnecte instanceof HealthPro) {
+	            HealthPro pro = (HealthPro) utilisateurConnecte;
+	            String examenId = "E" + (patient.getDossier().getExamens().size() + 1);
+	            
+	            MedicalExam nouvelExamen = new MedicalExam(examenId, LocalDateTime.now(), type, resultat, pro);
+	            patient.getDossier().ajouterExamen(nouvelExamen);
+	            System.out.println("Examen " + type + " ajouté au dossier de " + patient.getNom());
+	        } else {
+	            System.out.println("Erreur: Seul un professionnel de santé peut ajouter un examen.");
+	        }
+	    }    
+	    
+	    // --- Getters pour l'interface ---
+	    public List<User> listerUtilisateurs() { return utilisateurs; }
+	    public List<Patient> listerPatients() { return patients; }
+	}
 
 
 
 
-}
+
 
 
 
