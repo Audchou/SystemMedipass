@@ -347,6 +347,31 @@ import java.util.ArrayList;
 	        return true;
 	    }
 
+		// Retourne la liste des patients
+		public List<Patient> getPatients() {
+			return new ArrayList<>(patients);
+		}
+
+		// Retourne la liste des professionnels de santé
+		public List<HealthPro> getHealthPros() {
+			List<HealthPro> healthPros = new ArrayList<>();
+			for (User user : utilisateurs) {
+				if (user instanceof HealthPro) {
+					healthPros.add((HealthPro) user);
+				}
+			}
+			return healthPros;
+		}
+
+        public void exporterDonneesCSV() {
+            throw new UnsupportedOperationException("Unimplemented method 'exporterDonneesCSV'");
+        }
+
+        public void ajouterExamen(Patient patient, String type, String resultat) {
+			
+            throw new UnsupportedOperationException("Unimplemented method 'ajouterExamen'");
+        }
+
 
 
 
@@ -357,4 +382,4 @@ import java.util.ArrayList;
 
 
 
-	
+

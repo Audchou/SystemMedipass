@@ -10,7 +10,9 @@ import medipass.system.SystemeMedipass;
 import java.util.List;
 
 import medipass.entitie.*;
-
+import medipass.service.StatsService;
+import medipass.service.PatientService;
+import medipass.service.PrescriptionService;
 
 
 public class Main {
@@ -123,7 +125,7 @@ public class Main {
 			                    System.out.println("Choix invalide.");
 			            }
 		                case 2:
-		                	systeme.afficherStatistiques();
+							StatsService.afficherStatistiques(systeme.getPatients(), systeme.getHealthPros());
 		                	break;
 		                case 0:
 		                	systeme.seDeconnecter();
@@ -174,7 +176,7 @@ public class Main {
 		                    ajouterAntecedent();
 		                    	
 		                case 3:
-		                	supprimerPatient();
+							supprimerPatient();
 		                	break;
 		                case 4:
 		                	consulterDossierPatient();
@@ -331,9 +333,10 @@ public class Main {
 		        String prenom = scanner.nextLine();
 		        LocalDate dob = lireDate("Date de naissance");
 
-		        Patient nouveauPatient = new Patient(id, nom, prenom, dob);
-		        systeme.ajouterPatient(nouveauPatient);
-		    }
+				Patient nouveauPatient = new Patient(id, nom, prenom, dob);
+				PatientService patientService = new PatientService();
+				patientService.ajouterPatient(nouveauPatient);
+			}
 
 		    private static void consulterDossierPatient() {
 		        Patient patient = trouverPatient();
@@ -408,7 +411,7 @@ public class Main {
 		        System.out.print("Résultat de l'examen: ");
 		        String resultat = scanner.nextLine();
 
-		        systeme.ajouterExamen(patient, type, resultat);
+				systeme.ajouterExamen(patient, type, resultat);
 		    }
 
 		    private static void afficherSpecialiteDominante() {
@@ -481,7 +484,7 @@ public class Main {
 		    
 				        
 			private static void modifierPrescription() {
-				systeme.modifierPrescription();
+				PrescriptionService.modifierPrescription();
 					       
 		    }
 	        
@@ -557,36 +560,54 @@ public class Main {
 			    }
 		   }
 		
-		        private static int lireChoix() {
-			        try {
-			            return Integer.parseInt(scanner.nextLine());
-			        } catch (NumberFormatException e) {
-			            return -1;
-			        }
-			        
-		    }
-		        
-		        private static void supprimerUtilisateur() {
+				private static int lireChoix() {
+					try {
+						return Integer.parseInt(scanner.nextLine());
+					} catch (NumberFormatException e) {
+						return -1;
+					}
+					
+			}
+				
+				private static void supprimerUtilisateur() {
 		
-		            System.out.print("Login de l'utilisateur à supprimer: ");
-		            String login = scanner.nextLine();
+					System.out.print("Login de l'utilisateur à supprimer: ");
+					String login = scanner.nextLine();
+		
+					System.out.print("Êtes-vous sûr de vouloir supprimer cet utilisateur ? (oui/non): ");
+					String confirmation = scanner.nextLine();
+		
+					if (confirmation.equalsIgnoreCase("oui")) {
+						boolean succes = systeme.supprimerUtilisateur(login);
+						if (succes) {
+							System.out.println("Utilisateur supprimé avec succès.");
+						} else {
+							System.out.println("Erreur : utilisateur introuvable ou suppression impossible (peut-être vous-même).");
+						}
+					} else {
+						System.out.println("Suppression annulée.");
+					}
+				}
 
-		            System.out.print("Êtes-vous sûr de vouloir supprimer cet utilisateur ? (oui/non): ");
-		            String confirmation = scanner.nextLine();
-
-		            if (confirmation.equalsIgnoreCase("oui")) {
-		                boolean succes = systeme.supprimerUtilisateur(login);
-		                if (succes) {
-		                    System.out.println("Utilisateur supprimé avec succès.");
-		                } else {
-		                    System.out.println("Erreur : utilisateur introuvable ou suppression impossible (peut-être vous-même).");
-		                }
-		            } else {
-		                System.out.println("Suppression annulée.");
-		            }
-		        }
-
-		        
+				// Ajout de la méthode supprimerPatient
+				private static void supprimerPatient() {
+					System.out.print("Entrez l'ID du patient à supprimer : ");
+					String patientId = scanner.nextLine();
+					System.out.print("Êtes-vous sûr de vouloir supprimer ce patient ? (oui/non): ");
+					String confirmation = scanner.nextLine();
+					if (confirmation.equalsIgnoreCase("oui")) {
+						boolean succes = PatientService.supprimerPatient();
+						if (succes) {
+							System.out.println("Patient supprimé avec succès.");
+						} else {
+							System.out.println("Erreur : patient introuvable ou suppression impossible.");
+						}
+					} else {
+						System.out.println("Suppression annulée.");
+					}
+				}
+		
+				
 		}
 		
 

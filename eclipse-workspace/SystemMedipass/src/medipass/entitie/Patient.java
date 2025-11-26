@@ -1,6 +1,7 @@
 package medipass.entitie;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class Patient extends Personne {
     private MedicalRecord dossier;
@@ -18,6 +19,10 @@ public class Patient extends Personne {
     // Setter
     public void setDossier(MedicalRecord dossier) {
         this.dossier = dossier;
+    }
+
+    public List<MedicalExam> getMedicalExams() {
+        return dossier.getExamens();
     }
 
     @Override

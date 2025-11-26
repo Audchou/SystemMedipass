@@ -36,4 +36,21 @@ public class Prescription {
     public String toString() {
         return "Médicament: " + medicament + ", Posologie: " + posologie + ", Durée: " + dureeJours + " jours (Émis le: " + dateEmission + ")";
     }
+
+    // Définit le nom du médicament
+    public void setMedicament(String medicament2) {
+        this.medicament = medicament2;
+    }
+
+    // Définit la posologie
+    public void setPosologie(String posologie2) {
+        this.posologie = posologie2;
+    }
+
+    // Définit la durée en jours
+    public void setDuree(int dureeJours2) {
+        this.dureeJours = dureeJours2;
+        // Si vous souhaitez lever une exception, décommentez la ligne suivante :
+        // throw new UnsupportedOperationException("Méthode 'setDuree' non implémentée");
+    }
 }
