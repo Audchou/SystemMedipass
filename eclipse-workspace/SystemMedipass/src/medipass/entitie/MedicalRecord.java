@@ -18,9 +18,11 @@ public class MedicalRecord {
     private List<MedicalExam> examens = new ArrayList<>(); // NOUVEAU
     private boolean archive = false;
 
-    public MedicalRecord(String patientId) {
-        this.patientId = patientId;
+    public MedicalRecord(Patient p) {
+        this.patientId = p.getId();
+        this.archive = false;
     }
+
       //Methodes d'archivage 
     public void archiver() { archive = true; }
     public void desarchiver() { archive = false; }
@@ -36,6 +38,7 @@ public class MedicalRecord {
     public List<Consultation> getConsultations() { return consultations; }
     public List<MedicalExam> getExamens() { return examens; } // NOUVEAU
     public boolean isArchive() { return archive; }
+    public void setArchive(boolean archive) {this.archive = archive;}
     public String getPatientId() {return patientId; }
     public List<Prescription> getPrescriptions() {return prescriptions;}
 

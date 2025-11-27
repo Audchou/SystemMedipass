@@ -38,6 +38,10 @@ import java.util.ArrayList;
 	    public User getUtilisateurConnecte() {
 	        return utilisateurConnecte;
 	    }
+	    public List<Consultation> getConsultations() {
+	        return consultations;
+	    }
+
 	    
 	    // Ajouter un dossier à la liste
 	    public void ajouterDossier(MedicalRecord dossier) {
@@ -46,13 +50,12 @@ import java.util.ArrayList;
 	    
 	    // Méthode pour récupérer un dossier à partir de son ID
 	    public MedicalRecord getDossierByPatientId(String patientId) {
-	        for (MedicalRecord dossier : dossiers) {
-	            if (dossier.getPatientId().equals(patientId)) {
-	                return dossier; // dossier trouvé+-
-	            }
-	        }
-	        return null; // si le dossier est introuvable
+	        return dossiers.stream()
+	                .filter(d -> d.getPatientId().equalsIgnoreCase(patientId))
+	                .findFirst()
+	                .orElse(null);
 	    }
+
 	
 	
 	
@@ -82,17 +85,11 @@ import java.util.ArrayList;
 	        patients.add(p2);
 	 }
 	
-	 public boolean ajouterPatient(Patient patient) {
-		 for (Patient p : patients) {
-		        if (p.getId().equals(patient.getId())) {
-		            System.out.println("Erreur : un patient avec cet ID existe déjà !");
-		            return false;
-		        }
-		 }
-	        this.patients.add(patient);
-	        dossiers.add(new MedicalRecord(patient.getId()));
-		 return true;
-	 }
+	 public void ajouterPatient(Patient patient) {
+		    this.patients.add(patient);              
+		    ajouterDossier(patient.getDossier());    
+		}
+
 	
 	 public boolean supprimerPatient(Patient patient) {
 		    return this.patients.remove(patient);
@@ -158,7 +155,7 @@ import java.util.ArrayList;
 	
 	public boolean desarchiverDossier(String patientId) {
 	    if (!(utilisateurConnecte instanceof HealthPro) || 
-	         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("Médecin")) {
+	         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("MEDECIN")) {
 	        System.out.println("Action non autorisée : seul un médecin peut désarchiver un dossier.");
 	        return false;
 	    }
@@ -334,6 +331,16 @@ import java.util.ArrayList;
 	        return true;
 	}
 	    
+	    public boolean idExiste(String id) {
+	        return utilisateurs.stream()
+	                           .anyMatch(u -> u.getId().equals(id));
+	    }
+	    
+	    public boolean idExistePatient(String id) {
+	        return patients.stream()
+	                       .anyMatch(p -> p.getId().equals(id));
+	    }
+	    
 	    public void afficherUtilisateur(User u) {
 	        if (u == null) {
 	            System.out.println("Utilisateur introuvable !");
@@ -432,14 +439,14 @@ import java.util.ArrayList;
 	                nouvelleSpecialite != null ? nouvelleSpecialite : ""
 	            );
 	        }
+	            else {
+	                return false; // rôle invalide
+	            }
 
-	        if (nouveauUtilisateur != null) {
+	            // Une fois l'objet créé correctement, supprimer l'ancien et ajouter le nouveau
+	            this.utilisateurs.remove(utilisateurAModifier);
 	            this.utilisateurs.add(nouveauUtilisateur);
-	            return true; // Rôle modifié avec succès
-	        }
-
-	        return false; // Rôle invalide ou échec
-	    }
+	            return true;}
 	    
 
 	    public boolean supprimerUtilisateur(String login) {
@@ -477,27 +484,47 @@ import java.util.ArrayList;
 		
 		 // --- Fonctionnalités Statistiques ---
 
-	    public void afficherStatistiques() {
-	        System.out.println("\n--- Statistiques du Système Medipass ---");
-	        System.out.println("Nombre total de patients: " + patients.size());
-	        System.out.println("Nombre total d'utilisateurs: " + utilisateurs.size());
+		public void afficherStatistiques() {
+		    System.out.println("\n--- Statistiques du Système Medipass ---");
+		    System.out.println("Nombre total de patients: " + patients.size());
+		    System.out.println("Nombre total d'utilisateurs: " + utilisateurs.size());
 
-	        long nbProSante = utilisateurs.stream()
-	            .filter(u -> u instanceof HealthPro)
-	            .count();
-	        System.out.println("Nombre de professionnels de santé: " + nbProSante);
+		    // 1. Compter les Administrateurs
+		    long nbAdmins = utilisateurs.stream()
+		        .filter(u -> u instanceof Admin)
+		        .count();
+		    System.out.println("Nombre d'administrateurs: " + nbAdmins);
 
-	        long totalConsultations = patients.stream()
-	            .mapToLong(p -> p.getDossier().getConsultations().size())
-	            .sum();
-	        System.out.println("Nombre total de consultations enregistrées: " + totalConsultations);
-	        
-	        long totalExamens = patients.stream()
-	            .mapToLong(p -> p.getDossier().getExamens().size())
-	            .sum();
-	        System.out.println("Nombre total d'examens enregistrés: " + totalExamens);
-	        System.out.println("----------------------------------------\n");
-	    }
+		    // 2. Compter les Médecins
+		    long nbMedecins = utilisateurs.stream()
+		        .filter(u -> u instanceof HealthPro && u.getRole().equals("MEDECIN"))
+		        .count();
+		    System.out.println("Nombre de médecins: " + nbMedecins);
+
+		    // 3. Compter les Infirmiers
+		    long nbInfirmiers = utilisateurs.stream()
+		        .filter(u -> u instanceof HealthPro && u.getRole().equals("INFIRMIER"))
+		        .count();
+		    System.out.println("Nombre d'infirmiers: " + nbInfirmiers);
+		    
+		 // 3. Compter les Pharmaciens
+		    long nbPharmaciens = utilisateurs.stream()
+		        .filter(u -> u instanceof HealthPro && u.getRole().equals("PHARMACIEN"))
+		        .count();
+		    System.out.println("Nombre de pharmaciens: " + nbPharmaciens);
+
+		    // 4. Statistiques sur les actes
+		    long totalConsultations = patients.stream()
+		        .mapToLong(p -> p.getDossier().getConsultations().size())
+		        .sum();
+		    System.out.println("Nombre total de consultations enregistrées: " + totalConsultations);
+		    
+		    long totalExamens = patients.stream()
+		        .mapToLong(p -> p.getDossier().getExamens().size())
+		        .sum();
+		    System.out.println("Nombre total d'examens enregistrés: " + totalExamens);
+		    System.out.println("----------------------------------------\n");
+		}
 
 		  // --- Fonctionnalités Bonus ---
 	    

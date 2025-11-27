@@ -8,7 +8,7 @@ public class Patient extends Personne {
 
     public Patient(String id, String nom, String prenom, LocalDate dateNaissance) {
         super(id, nom, prenom, dateNaissance);
-        this.dossier = new MedicalRecord(id); // Chaque patient a un dossier unique
+        this.dossier = new MedicalRecord(this); // Chaque patient a un dossier unique
     }
 
     // Getter

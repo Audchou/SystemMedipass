@@ -73,7 +73,7 @@ public class Main {
 		        while (choix != 0) {
 		        	if (admin != null) {
 		        	    System.out.println("\n--- Menu Administrateur ---");
-		        	    System.out.println("Bienvenue ProSante " + admin.getNom());
+		        	    System.out.println("Bienvenue Admin " + admin.getNom());
 		        	} else {
 		        	    System.out.println("Aucun utilisateur connecté !");
 		        	}
@@ -99,6 +99,7 @@ public class Main {
 			                	System.out.println("1. Modifier mot de passe");
 			                	System.out.println("2. Modifier spécialité");
 			                	System.out.println("3. Modifier rôle");
+			                	System.out.print("Votre choix: ");
 			                	choix = lireChoix();
 			                	
 			                switch (choix) {
@@ -110,6 +111,7 @@ public class Main {
 			                	break;
 			                case 3:
 			                	modifierRole();
+			                	break;
 			                	default:
 			                		 System.out.println("Choix invalide.");
 			                }
@@ -123,6 +125,7 @@ public class Main {
 		                    default:
 			                    System.out.println("Choix invalide.");
 			            }
+		 		           break;
 		                case 2:
 		                	systeme.afficherStatistiques();
 		                	break;
@@ -143,7 +146,7 @@ public class Main {
 		        while (choix != 0) {
 		        	if (healthpro != null) {
 		        	    System.out.println("\n--- Menu Professionnel de Santé ---");
-		        	    System.out.println("Bienvenue Admin " + healthpro.getNom());
+		        	    System.out.println("Bienvenue ProSante " + healthpro.getNom());
 		        	} else {
 		        	    System.out.println("Aucun utilisateur connecté !");
 		        	}
@@ -165,6 +168,7 @@ public class Main {
 		 		            System.out.println("3. Supprimer un patient");
 		 		            System.out.println("4. Rechercher et consulter un dossier patient");
 		 		            System.out.println("5. Afficher la spécialité dominante d'un dossier médical patient (Bonus)");
+		 		            System.out.print("Votre choix: ");
 		 		            choix = lireChoix();
 
 		 		           switch (choix) {
@@ -195,6 +199,7 @@ public class Main {
 		                	System.out.println("1. Créer une nouvelle consultation");
 				            System.out.println("2. Modifier une consultation");
 				            System.out.println("3. Liste des consultations par specialité médicale (Bonus)");
+				            System.out.print("Votre choix: ");
 				            int choixConsu = lireChoix();
 				            
 				            switch (choixConsu) {
@@ -215,6 +220,7 @@ public class Main {
 		              case 3:
 		                  System.out.println("1. Créer une prescription");
 		 		          System.out.println("2. Modifier une prescription");
+		 		          System.out.print("Votre choix: ");
 		 		         int choixPresc = lireChoix();
 				            
 				            switch (choixPresc) {
@@ -240,6 +246,7 @@ public class Main {
 		            	  System.out.println("1. Archiver un dossier");
 		 		          System.out.println("2. Désarchiver un dossier");
 		 		          System.out.println("3. Voir la liste des dossiers archivés");
+		 		          System.out.print("Votre choix: ");
 		 		         int choixArchive = lireChoix();
 		 		        switch (choixArchive) {
 		                case 1:
@@ -298,8 +305,14 @@ public class Main {
 
 		    private static void ajouterUtilisateur() {
 		        System.out.println("\n--- Ajout d'un Utilisateur ---");
-		        System.out.print("ID Utilisateur (ex: U004): ");
-		        String id = scanner.nextLine();
+		        System.out.print("ID de l'utilisateur à créer (Exemple U004) : ");
+		        String id = scanner.nextLine().trim();
+
+		        if (systeme.idExiste(id)) {
+		            System.out.println("Erreur : un utilisateur avec cet ID existe déjà !");
+		            return;
+		        }
+
 		        System.out.print("Nom: ");
 		        String nom = scanner.nextLine();
 		        System.out.print("Prénom: ");
@@ -315,7 +328,7 @@ public class Main {
 		        User nouvelUtilisateur = null;
 		        if (role.equals("ADMIN")) {
 		            nouvelUtilisateur = new Admin(id, nom, prenom, dob, login, mdp);
-		        } else if (role.equals("MEDECIN") || role.equals("INFIRMIER")) {
+		        } else if (role.equals("MEDECIN") || role.equals("INFIRMIER") || role.equals("PHARMACIEN")) {
 		            System.out.print("Spécialité: ");
 		            String specialite = scanner.nextLine();
 		            nouvelUtilisateur = new HealthPro(id, nom, prenom, dob, login, mdp, role, specialite);
@@ -337,7 +350,13 @@ public class Main {
 		    private static void inscrirePatient() {
 		        System.out.println("\n--- Inscription d'un Patient ---");
 		        System.out.print("ID Patient (ex: P003): ");
-		        String id = scanner.nextLine();
+		        String id = scanner.nextLine().trim();
+
+		        //Vérifier si l'ID existe déjà
+		        if (systeme.idExistePatient(id)) {
+		            System.out.println("Erreur : un patient avec cet ID existe déjà !");
+		            return; 
+		        }
 		        System.out.print("Nom: ");
 		        String nom = scanner.nextLine();
 		        System.out.print("Prénom: ");
@@ -401,6 +420,71 @@ public class Main {
 		            System.out.println(e.getMessage());
 		        }
 		    }
+		    
+		    
+			private static void modifierConsultation() {
+				System.out.print("ID de la consultation à modifier : ");
+				String id = scanner.nextLine();
+
+				// Chercher la consultation
+				Optional<Consultation> opt = systeme.getConsultations().stream()
+				        .filter(c -> c.getId().equals(id))
+				        .findFirst();
+
+				
+
+				Consultation ancienne = opt.get();
+				Patient patient = ancienne.getPatient();
+
+				// Vérifier si le dossier est archivé
+				if (patient.getDossier().isArchive()) {
+				    System.out.println("Impossible de modifier une consultation : dossier archivé !");
+				    return;
+				}
+
+				// Nouvelle date avec réessai si invalide ou indisponible
+				LocalDateTime nouvelleDate = null;
+				while (true) {
+				    System.out.print("Nouvelle date (yyyy-MM-dd HH:mm) ou ENTER pour garder l'ancienne : ");
+				    String dateStr = scanner.nextLine();
+				    if (dateStr.isEmpty()) break;
+
+				    try {
+				    	LocalDateTime dateTemp = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+				        boolean occupe = systeme.getConsultations().stream()
+				                .anyMatch(c ->
+				                        c.getProfessionnel().equals(ancienne.getProfessionnel()) &&
+				                        c.getDate().equals(dateTemp) &&
+				                        !c.getId().equals(id)
+				                );
+
+				        if (occupe) {
+				            System.out.println("Le professionnel n'est pas disponible à cette date. Réessayez.");
+				            continue; // re-demander
+				        }
+				        nouvelleDate = dateTemp;
+				        break;
+		}
+
+				    catch (DateTimeParseException e) {
+				        System.out.println("Format de date invalide ! Réessayez.");
+				    }
+			}
+
+				// Nouveau motif
+				System.out.print("Nouveau motif ou ENTER pour garder l'ancien : ");
+				String nouveauMotif = scanner.nextLine();
+				if (nouveauMotif.isEmpty()) nouveauMotif = null;
+
+				// Nouvelles observations
+				System.out.print("Nouvelles observations ou ENTER pour garder l'ancien : ");
+				String nouvellesObservations = scanner.nextLine();
+				if (nouvellesObservations.isEmpty()) nouvellesObservations = null;
+
+				// Modifier la consultation
+				systeme.modifierConsultation(id, nouvelleDate, nouveauMotif, nouvellesObservations);
+				 System.out.println("Modification apportées. Succès");
+		}
 		    
 		    private static void creerPrescription() {
 		        Patient patient = trouverPatient(); // Méthode qui retourne le patient sélectionné
@@ -528,38 +612,7 @@ public class Main {
 		                System.out.println("Erreur : modification impossible.");
 		            }
 		        }
-		       
-		    
-		   
-		    
-			private static void modifierConsultation() {
-			    System.out.print("ID de la consultation à modifier : ");
-			    String id = scanner.nextLine();
-
-			    System.out.print("Nouvelle date (yyyy-MM-dd HH:mm) ou ENTER pour garder l'ancienne : ");
-			    String dateStr = scanner.nextLine();
-			    LocalDateTime nouvelleDate = dateStr.isEmpty() ? null :
-			        LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-
-			    System.out.print("Nouveau motif ou ENTER pour garder l'ancien : ");
-			    String nouveauMotif = scanner.nextLine();
-			    if (nouveauMotif.isEmpty()) nouveauMotif = null;
-
-			    System.out.print("Nouvelles observations ou ENTER pour garder l'ancien : ");
-			    String nouvellesObservations = scanner.nextLine();
-			    if (nouvellesObservations.isEmpty()) nouvellesObservations = null;
-
-			    try {
-			        systeme.modifierConsultation(id, nouvelleDate, nouveauMotif, nouvellesObservations);
-			        System.out.println("Consultation modifiée avec succès !");
-			    } catch (IllegalArgumentException e) {
-			        System.out.println("Erreur : " + e.getMessage());
-			    }
-			}
-			
-
-		   
-		   
+		     
 		   private static void archiverDossier() {
 			    System.out.print("Entrez l'ID du patient à archiver : ");
 			    String patientId = scanner.nextLine();
