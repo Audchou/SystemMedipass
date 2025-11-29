@@ -12,14 +12,18 @@ import java.util.List;
 import medipass.entitie.*;
 
 
-
+//Classe principale qui contient le menu pour la navigation en console du programme
 public class Main {
+	
+	 // Instance du système centralisé Medipass
 	 private static SystemeMedipass systeme = SystemeMedipass.getInstance();
 	  private static Scanner scanner = new Scanner(System.in);
 	 private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	 
 
 	public static void main(String[] args) {
+		
+		 // Affichage du menu principal entrée  
 		 System.out.println("===================================================");
 	        System.out.println("  Système d'Information Médical Medipass (Console) ");
 	        System.out.println("===================================================");
@@ -60,6 +64,7 @@ public class Main {
 	                    System.out.println("Erreur de connexion. Veuillez réessayer.");
 	                }
 	            }
+	            // Redirection vers le menu correspondant au rôle
 	            if (utilisateur instanceof Admin) {
 		            menuAdministrateur();
 		        } else if (utilisateur instanceof HealthPro) {
@@ -82,7 +87,8 @@ public class Main {
 		            System.out.println("0. Déconnexion");
 		            System.out.print("Votre choix: ");
 		            int choixUser = lireChoix();
-
+		         
+		            // Gestion des sous-menus
 		            switch (choixUser) {
 		                case 1:
 		                	System.out.println("1. Ajouter un utilisateur");
@@ -302,12 +308,15 @@ public class Main {
 		        }
 		        return patientOpt.get();
 		    }
+		                          
+		                           //USERS
 
 		    private static void ajouterUtilisateur() {
 		        System.out.println("\n--- Ajout d'un Utilisateur ---");
 		        System.out.print("ID de l'utilisateur à créer (Exemple U004) : ");
 		        String id = scanner.nextLine().trim();
-
+		        
+		     
 		        if (systeme.idExiste(id)) {
 		            System.out.println("Erreur : un utilisateur avec cet ID existe déjà !");
 		            return;
@@ -336,21 +345,18 @@ public class Main {
 		            System.out.println("Rôle invalide. Utilisateur non créé.");
 		            return;
 		        }
-
+		        // Ajout au système
 		        systeme.ajouterUtilisateur(nouvelUtilisateur);
 		    }
-		    private static void afficherUtilisateur()  {		    
-		    System.out.print("Entrez l'ID de l'utilisateur à rechercher: ");
-		    String id = scanner.nextLine();
+		    
+		    
 
-		    User user = systeme.rechercherUtilisateur(id);
-		    systeme.afficherUtilisateur(user);
-		    }
-
+		              // Gestion PATIENTS
+		    
 		    private static void inscrirePatient() {
 		        System.out.println("\n--- Inscription d'un Patient ---");
 		        System.out.print("ID Patient (ex: P003): ");
-		        String id = scanner.nextLine().trim();
+		        String id = scanner.nextLine().trim().toUpperCase();
 
 		        //Vérifier si l'ID existe déjà
 		        if (systeme.idExistePatient(id)) {
@@ -369,20 +375,57 @@ public class Main {
 		        
 
 			}
+		    
+		    private static void supprimerUtilisateur() {
+				
+				System.out.print("Login de l'utilisateur à supprimer: ");
+				String login = scanner.nextLine();
+	
+				System.out.print("Êtes-vous sûr de vouloir supprimer cet utilisateur ? (oui/non): ");
+				String confirmation = scanner.nextLine();
+	
+				if (confirmation.equalsIgnoreCase("oui")) {
+					boolean succes = systeme.supprimerUtilisateur(login);
+					if (succes) {
+						System.out.println("Utilisateur supprimé avec succès.");
+					} else {
+						System.out.println("Erreur : utilisateur introuvable ou suppression impossible (peut-être vous-même).");
+					}
+				} else {
+					System.out.println("Suppression annulée.");
+				}
+			}
+		    
+		    private static void afficherUtilisateur()  {		    
+			    System.out.print("Entrez l'ID de l'utilisateur à rechercher: ");
+			    String id = scanner.nextLine();
 
-		    private static void consulterDossierPatient() {
+			    User user = systeme.rechercherUtilisateur(id);
+			    systeme.afficherUtilisateur(user);
+			    }
+
+	        private static void consulterDossierPatient() {
 		        Patient patient = trouverPatient();
 		        if (patient != null) {
 		            System.out.println(patient.getDossier());
 		        }
 		    }
-
+                       // Gestion CONSULTATIONS
+	        
 		    private static void creerConsultation() {
 		        Patient patient = trouverPatient();
 		        if (patient == null) return;
-
-		        System.out.print("ID de la consultation (ex: C001): ");
-		        String consultId = scanner.nextLine();
+		        System.out.print("Entrez l'ID de la consultation (ex: C001): ");
+		        String id = scanner.nextLine().trim().toUpperCase();
+		        if (systeme.idConsultationExiste(id)) {
+		            System.out.println("Erreur : une consultation avec cet ID existe déjà !");
+		            return;
+		        }
+		        if (patient.getDossier().getConsultations().stream()
+		                .anyMatch(c -> c.getId().equalsIgnoreCase(id))) {
+		            System.out.println("Erreur : ce patient a déjà une consultation avec cet ID !");
+		            return;
+		        }
 		        System.out.print("Observations: ");
 		        String observations = scanner.nextLine();
 		        System.out.print("Motif de la consultation: ");
@@ -390,31 +433,39 @@ public class Main {
                
 		        
 		        LocalDateTime date = null;
-
-		        while (true) {
+		     
+		        // Vérifier si la date est dans antérieure a celle actuelle
+		         while (true) {
 		            System.out.print("Date de la consultation (yyyy-MM-dd HH:mm): ");
-		            String dateStr = scanner.nextLine();
+		            String dateStr = scanner.nextLine().trim();
+
 
 		            try {
 		                date = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-		                break; // 🎉 Date valide → on sort de la boucle
-		            } catch (DateTimeParseException e) {
-		                System.out.println("❌ Format de date invalide ! Exemple correct : 2025-03-12 14:30");
+                    
+		            if (date.isBefore(LocalDateTime.now())) {
+			            System.out.println("Erreur : impossible de programmer une consultation antérieure à celle d'aujourd'hui !");
+			            continue;
+			        }
+		            break;
+		        }
+		            catch (DateTimeParseException e) {
+		                System.out.println("Format de date invalide ! Exemple correct : 2025-03-12 14:30");
 		                System.out.println("Veuillez réessayer...\n");
 		            }
 		        }
 
 
-		        // Étape 3 : récupérer le pro connecté
+		        
 		        if (!(systeme.getUtilisateurConnecte() instanceof HealthPro)) {
 		            System.out.println("Erreur : Seul un professionnel de santé peut créer une consultation.");
 		            return;
 		        }
 		        HealthPro pro = (HealthPro) systeme.getUtilisateurConnecte();
 
-		        // Étape 4 : appeler la méthode centrale dans SystemeMedipass
+		     // Appel à la méthode singleton du système pour créer la consultation
 		        try {
-		            systeme.creerConsultation(consultId,date, motif, observations, pro, patient);
+		            systeme.creerConsultation(id,date, motif, observations, pro, patient);
 		            System.out.print("Consultation programmé avec succès"); 
 		        } catch (IllegalArgumentException e) {
 		            System.out.println(e.getMessage());
@@ -431,16 +482,11 @@ public class Main {
 				        .filter(c -> c.getId().equals(id))
 				        .findFirst();
 
-				
-
-				Consultation ancienne = opt.get();
-				Patient patient = ancienne.getPatient();
-
-				// Vérifier si le dossier est archivé
-				if (patient.getDossier().isArchive()) {
-				    System.out.println("Impossible de modifier une consultation : dossier archivé !");
+				if (!opt.isPresent()) {
+				    System.out.println("Aucune consultation trouvée pour cet ID !");
 				    return;
 				}
+				Consultation ancienne = opt.get();
 
 				// Nouvelle date avec réessai si invalide ou indisponible
 				LocalDateTime nouvelleDate = null;
@@ -451,6 +497,10 @@ public class Main {
 
 				    try {
 				    	LocalDateTime dateTemp = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+				    	if (dateTemp.isBefore(LocalDateTime.now())) {
+				    	    System.out.println("Erreur : la date doit être futur !");
+				    	    continue;  // redemande une date
+				    	}
 				        boolean occupe = systeme.getConsultations().stream()
 				                .anyMatch(c ->
 				                        c.getProfessionnel().equals(ancienne.getProfessionnel()) &&
@@ -460,7 +510,7 @@ public class Main {
 
 				        if (occupe) {
 				            System.out.println("Le professionnel n'est pas disponible à cette date. Réessayez.");
-				            continue; // re-demander
+				            continue; // reessayer
 				        }
 				        nouvelleDate = dateTemp;
 				        break;
@@ -483,13 +533,15 @@ public class Main {
 
 				// Modifier la consultation
 				systeme.modifierConsultation(id, nouvelleDate, nouveauMotif, nouvellesObservations);
-				 System.out.println("Modification apportées. Succès");
+				 
 		}
-		    
-		    private static void creerPrescription() {
-		        Patient patient = trouverPatient(); // Méthode qui retourne le patient sélectionné
+			
+			               //Gestion PRESCRITIONS
+			private static void creerPrescription() {
+		        Patient patient = trouverPatient(); 
 		        if (patient == null) return;
-
+		        
+		        // Saisie des infos de la prescription
 		        System.out.print("Médicament: ");
 		        String medicament = scanner.nextLine();
 		        System.out.print("Posologie: ");
@@ -532,7 +584,7 @@ public class Main {
 		    	}
 
 
-
+            
 		    private static void ajouterExamen() {
 		        Patient patient = trouverPatient();
 		        if (patient == null) return;
@@ -554,7 +606,8 @@ public class Main {
 		            System.out.println("La spécialité dominante du dossier est: " + patient.getDossier().getSpecialiteDominante());
 		        }
 		    }
-		        
+		    
+		    // Afficher toutes les consultations pour une spécialité donnée    
 		    private static void consultationsParSpecialite() {
 		    	
 		    	    System.out.print("Entrez la spécialité recherchée: ");
@@ -612,6 +665,8 @@ public class Main {
 		                System.out.println("Erreur : modification impossible.");
 		            }
 		        }
+		    
+		                  // ARCHIVAGE
 		     
 		   private static void archiverDossier() {
 			    System.out.print("Entrez l'ID du patient à archiver : ");
@@ -662,10 +717,11 @@ public class Main {
 		   
 		   private static void ajouterAntecedent() {
 			    System.out.print("Entrez l'ID du patient : ");
-			    String patientId = scanner.nextLine();
+			    String id = scanner.nextLine().trim().toUpperCase();
+
 
 			  
-			    Patient patient = systeme.rechercherPatient(patientId).orElse(null); // 
+			    Patient patient = systeme.rechercherPatient(id).orElse(null); 
 			    if (patient == null) {
 			        System.out.println("Patient introuvable !");
 			        return;
@@ -686,38 +742,17 @@ public class Main {
 			    }
 			}
 
-		
+		         // Pour récupérer le choix d'option de l'utilisateur qui interagit avec le systeme
 				private static int lireChoix() {
 					try {
 						return Integer.parseInt(scanner.nextLine());
 					} catch (NumberFormatException e) {
-						return -1;
+						return -1; //Retourne -1 si entrée invalide
 					}
 					
 			}
+}	
 				
-				private static void supprimerUtilisateur() {
-		
-					System.out.print("Login de l'utilisateur à supprimer: ");
-					String login = scanner.nextLine();
-		
-					System.out.print("Êtes-vous sûr de vouloir supprimer cet utilisateur ? (oui/non): ");
-					String confirmation = scanner.nextLine();
-		
-					if (confirmation.equalsIgnoreCase("oui")) {
-						boolean succes = systeme.supprimerUtilisateur(login);
-						if (succes) {
-							System.out.println("Utilisateur supprimé avec succès.");
-						} else {
-							System.out.println("Erreur : utilisateur introuvable ou suppression impossible (peut-être vous-même).");
-						}
-					} else {
-						System.out.println("Suppression annulée.");
-					}
-				}
-
-				
-	}
 		
 				
 	

@@ -46,6 +46,9 @@ public class Consultation {
     public Patient getPatient() {
         return patient;
     }
+    public void setDate(LocalDateTime date) { this.date = date; }
+    public void setMotif(String motif) { this.motif = motif; }
+    public void setObservations(String obs) { this.observations = obs; }
 
     @Override
     public String toString() {
