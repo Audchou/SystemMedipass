@@ -274,6 +274,7 @@ import java.util.ArrayList;
 	            System.out.println("Utilisateur " + utilisateur.getNom() + " ajouté.");
 	        } else {
 	            System.out.println("Erreur: Seul un administrateur peut ajouter des utilisateurs.");
+	            return false;
 	        }
 	        return true;
 	}
@@ -305,7 +306,7 @@ import java.util.ArrayList;
 	        User utilisateurASupprimer = null;
 
 	        for (User u : this.utilisateurs) {
-	            if (u.getLogin().equals(login)) {
+	        	if (u.getLogin().equalsIgnoreCase(login.trim())) {
 	                utilisateurASupprimer = u;
 	                break;
 	            }
@@ -334,7 +335,7 @@ import java.util.ArrayList;
 	    // Modifie le mot de passe d'un utilisateur à partir de son login
 	    public boolean modifierMotDePasse(String login, String nouveauMotDePasse) {
 	        for (User u : this.utilisateurs) {
-	            if (u.getLogin().equals(login)) {
+	        	if (u.getLogin().equalsIgnoreCase(login.trim())) {
 	                u.setMotDePasse(nouveauMotDePasse);
 	                return true;
 	            }
@@ -345,7 +346,7 @@ import java.util.ArrayList;
 	    // Modifie la spécialité d'un professionnel de santé
 	    public boolean modifierSpecialite(String login, String nouvelleSpecialite) {
 	        for (User u : this.utilisateurs) {
-	            if (u.getLogin().equals(login)) {
+	        	if (u.getLogin().equalsIgnoreCase(login.trim())) {
 	                if (u instanceof HealthPro) {
 	                    HealthPro healthPro = (HealthPro) u;
 	                    healthPro.setSpecialite(nouvelleSpecialite);
@@ -362,7 +363,7 @@ import java.util.ArrayList;
 
 	        // recherche de l'utilisateur
 	        for (User u : this.utilisateurs) {
-	            if (u.getLogin().equals(login)) {
+	        	if (u.getLogin().equalsIgnoreCase(login.trim())) {
 	                utilisateurAModifier = u;
 	                break;
 	            }
@@ -407,8 +408,6 @@ import java.util.ArrayList;
 	            else {
 	                return false; 
 	            }
-
-	            this.utilisateurs.remove(utilisateurAModifier);
 	            this.utilisateurs.add(nouveauUtilisateur);
 	            return true;
 	            }

@@ -349,32 +349,47 @@ public class Main {
 		        systeme.ajouterUtilisateur(nouvelUtilisateur);
 		    }
 		    
+		    private static void modifierMotDePasse() {
+	        	 
+	        	System.out.print("Login de l'utilisateur à modifier: ");
+	        	    String login = scanner.nextLine();
+		    	System.out.print("Nouveau mot de passe: ");
+	            String mdp = scanner.nextLine();
+	            if (systeme.modifierMotDePasse(login, mdp)) {
+	                System.out.println("Mot de passe modifié !");
+	            } else {
+	                System.out.println("Erreur : utilisateur non trouvé.");
+	            }
+		    }
 		    
-
-		              // Gestion PATIENTS
+		    private static void modifierSpecialite() {
+		    	
+		    	System.out.print("Login de l'utilisateur à modifier: ");
+        	    String login = scanner.nextLine();
+		    	System.out.print("Nouvelle spécialité: ");
+	            String specialite = scanner.nextLine();
+	            if (systeme.modifierSpecialite(login, specialite)) {
+	                System.out.println("Spécialité modifiée !");
+	            } else {
+	                System.out.println("Erreur : utilisateur non trouvé ou pas un professionnel de santé.");
+	            }
+		    }
 		    
-		    private static void inscrirePatient() {
-		        System.out.println("\n--- Inscription d'un Patient ---");
-		        System.out.print("ID Patient (ex: P003): ");
-		        String id = scanner.nextLine().trim().toUpperCase();
+		    private static void modifierRole() {
 
-		        //Vérifier si l'ID existe déjà
-		        if (systeme.idExistePatient(id)) {
-		            System.out.println("Erreur : un patient avec cet ID existe déjà !");
-		            return; 
+		    	System.out.print("Login de l'utilisateur à modifier: ");
+        	    String login = scanner.nextLine();
+		    	 System.out.print("Nouveau rôle (ADMIN, MEDECIN, INFIRMIER, PHARMACIEN): ");
+		            String role = scanner.nextLine();
+		            System.out.print("Nouvelle spécialité (si pro santé) : ");
+		            String specialite = scanner.nextLine();
+		            if (systeme.modifierRole(login, role, specialite)) {
+		                System.out.println("Rôle modifié !");
+		            } else {
+		                System.out.println("Erreur : modification impossible.");
+		            }
 		        }
-		        System.out.print("Nom: ");
-		        String nom = scanner.nextLine();
-		        System.out.print("Prénom: ");
-		        String prenom = scanner.nextLine();
-		        LocalDate dob = lireDate("Date de naissance");
-
-		        Patient nouveauPatient = new Patient(id, nom, prenom, dob);
-		        systeme.ajouterPatient(nouveauPatient);
-		        System.out.println("Patient créé avec succès : " + nom + " " + prenom);
-		        
-
-			}
+		    
 		    
 		    private static void supprimerUtilisateur() {
 				
@@ -403,14 +418,64 @@ public class Main {
 			    User user = systeme.rechercherUtilisateur(id);
 			    systeme.afficherUtilisateur(user);
 			    }
+		    
+		    
 
+		              // Gestion PATIENTS
+		    
+		    private static void inscrirePatient() {
+		        System.out.println("\n--- Inscription d'un Patient ---");
+		        System.out.print("ID Patient (ex: P003): ");
+		        String id = scanner.nextLine().trim().toUpperCase();
+
+		        //Vérifier si l'ID existe déjà
+		        if (systeme.idExistePatient(id)) {
+		            System.out.println("Erreur : un patient avec cet ID existe déjà !");
+		            return; 
+		        }
+		        System.out.print("Nom: ");
+		        String nom = scanner.nextLine();
+		        System.out.print("Prénom: ");
+		        String prenom = scanner.nextLine();
+		        LocalDate dob = lireDate("Date de naissance");
+
+		        Patient nouveauPatient = new Patient(id, nom, prenom, dob);
+		        systeme.ajouterPatient(nouveauPatient);
+		        System.out.println("Patient créé avec succès : " + nom + " " + prenom);
+	}
+	
 	        private static void consulterDossierPatient() {
 		        Patient patient = trouverPatient();
 		        if (patient != null) {
 		            System.out.println(patient.getDossier());
 		        }
 		    }
-                       // Gestion CONSULTATIONS
+	        
+	        private static void supprimerPatient() {
+				   System.out.print("Entrez l'ID du patient à supprimer : ");
+				   String id = scanner.nextLine();
+
+				   // étape 1 : retrouver le patient
+				   Patient patient = systeme.rechercherPatient(id).orElse(null);
+
+
+				   if (patient == null) {
+				       System.out.println("Patient inexistant !");
+				   } else {
+				       // étape 2 : supprimer
+				       if (systeme.supprimerPatient(patient)) {
+				           System.out.println("Patient supprimé avec succès.");
+				       } else {
+				           System.out.println("Erreur : impossible de supprimer ce patient.");
+				       }
+				   }
+
+		    }
+               
+	        
+	        
+	        
+	                       // Gestion CONSULTATIONS
 	        
 		    private static void creerConsultation() {
 		        Patient patient = trouverPatient();
@@ -625,47 +690,7 @@ public class Main {
 		    	    }
 		    	}
 
-	         private static void modifierMotDePasse() {
-	        	 
-	        	System.out.print("Login de l'utilisateur à modifier: ");
-	        	    String login = scanner.nextLine();
-		    	System.out.print("Nouveau mot de passe: ");
-	            String mdp = scanner.nextLine();
-	            if (systeme.modifierMotDePasse(login, mdp)) {
-	                System.out.println("Mot de passe modifié !");
-	            } else {
-	                System.out.println("Erreur : utilisateur non trouvé.");
-	            }
-		    }
-		    
-		    private static void modifierSpecialite() {
-		    	
-		    	System.out.print("Login de l'utilisateur à modifier: ");
-        	    String login = scanner.nextLine();
-		    	System.out.print("Nouvelle spécialité: ");
-	            String specialite = scanner.nextLine();
-	            if (systeme.modifierSpecialite(login, specialite)) {
-	                System.out.println("Spécialité modifiée !");
-	            } else {
-	                System.out.println("Erreur : utilisateur non trouvé ou pas un professionnel de santé.");
-	            }
-		    }
-		    
-		    private static void modifierRole() {
-
-		    	System.out.print("Login de l'utilisateur à modifier: ");
-        	    String login = scanner.nextLine();
-		    	 System.out.print("Nouveau rôle (ADMIN, MEDECIN, INFIRMIER, PHARMACIEN): ");
-		            String role = scanner.nextLine();
-		            System.out.print("Nouvelle spécialité (si pro santé) : ");
-		            String specialite = scanner.nextLine();
-		            if (systeme.modifierRole(login, role, specialite)) {
-		                System.out.println("Rôle modifié !");
-		            } else {
-		                System.out.println("Erreur : modification impossible.");
-		            }
-		        }
-		    
+	        
 		                  // ARCHIVAGE
 		     
 		   private static void archiverDossier() {
@@ -679,27 +704,6 @@ public class Main {
 			        System.out.println("Impossible d'archiver ce dossier. Vérifiez votre rôle ou l'état du dossier.");
 			    }
 				       
-	    }
-		   
-		   private static void supprimerPatient() {
-			   System.out.print("Entrez l'ID du patient à supprimer : ");
-			   String id = scanner.nextLine();
-
-			   // étape 1 : retrouver le patient
-			   Patient patient = systeme.rechercherPatient(id).orElse(null);
-
-
-			   if (patient == null) {
-			       System.out.println("Patient inexistant !");
-			   } else {
-			       // étape 2 : supprimer
-			       if (systeme.supprimerPatient(patient)) {
-			           System.out.println("Patient supprimé avec succès.");
-			       } else {
-			           System.out.println("Erreur : impossible de supprimer ce patient.");
-			       }
-			   }
-
 	    }
 		  
 		   
