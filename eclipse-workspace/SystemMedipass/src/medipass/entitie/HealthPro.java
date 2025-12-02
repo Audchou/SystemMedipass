@@ -31,7 +31,7 @@ public class HealthPro  extends User {
     
  
    
-	 // Contrôles d'accès
+	 //Méthodes pour Contrôles d'accès
 	    public boolean peutCreerConsultation() {
 	        return getRole().equalsIgnoreCase("MEDECIN");
 	    }

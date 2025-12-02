@@ -59,13 +59,14 @@ public class Main {
 	                System.out.print("Mot de passe: ");
 	                String mdp = scanner.nextLine();
      
-	            User utilisateur = systeme.seConnecter(login, mdp); // stocker le retour
+	            User utilisateur = systeme.seConnecter(login, mdp); 
 	            if (utilisateur != null) {
 	            	
 	            	System.out.println("\nConnexion réussie !");
 	                System.out.println("Bienvenu " + utilisateur.getNom() + ", vous êtes connecté en tant que " 
 	                                   + (utilisateur instanceof Admin ? "Administrateur" : "Professionnel de Santé"));
-	            // Redirection vers le menu correspondant au rôle
+	            
+	                // Redirection vers le menu correspondant au rôle
 	            if (utilisateur instanceof Admin) {
 		            menuAdministrateur(utilisateur);
 		        } else if (utilisateur instanceof HealthPro) {
@@ -73,7 +74,7 @@ public class Main {
 		        }
 	            break;
 	          }else {
-	              // Si login ou mot de passe incorrect
+	              // Si le login ou mot de passe incorrect
 	              System.out.println("Erreur de connexion. Veuillez réessayer.");
 	          }
 	        }
@@ -313,7 +314,6 @@ public class Main {
 		        String id = scanner.nextLine();
 		        Optional<Patient> patientOpt = systeme.rechercherPatient(id);
 		        if (patientOpt.isEmpty()) {
-		            System.out.println("Patient non trouvé.");
 		            return null;
 		        }
 		        return patientOpt.get();
@@ -323,7 +323,7 @@ public class Main {
 
 		    private static void ajouterUtilisateur() {
 		        System.out.println("\n--- Ajout d'un Utilisateur ---");
-		        System.out.print("ID de l'utilisateur à créer (Exemple U004) : ");
+		        System.out.print("ID de l'utilisateur à créer (Exemple U006) : ");
 		        String id = scanner.nextLine().trim();
 		        
 		     
@@ -473,11 +473,11 @@ public class Main {
                     if (utilisateur instanceof Admin) {
 		            System.out.print("Code de dérogation requis : ");
 		            String code = scanner.nextLine().trim();
-		            if ("MEDIPASS2025".equals(code)) { // ton code de dérogation
-		                System.out.println("Code valide, accès autorisé.");
+		            if ("MEDIPASS2025".equals(code)) { 
+		                System.out.println("Vous êtes habilité. Voici le dossier");
 		                System.out.println(patient.getDossier());
 		            } else {
-		                System.out.println("Code invalide, accès refusé.");
+		                System.out.println("Code invalide, vous n'êtes pas autorisé à consulter les dossiers médicaux");
 		            }
 		        } 
 		    }
@@ -492,14 +492,11 @@ public class Main {
 				   System.out.print("Entrez l'ID du patient à supprimer : ");
 				   String id = scanner.nextLine();
 
-				   // étape 1 : retrouver le patient
 				   Patient patient = systeme.rechercherPatient(id).orElse(null);
-
 
 				   if (patient == null) {
 				       System.out.println("Patient inexistant !");
 				   } else {
-				       // étape 2 : supprimer
 				       if (systeme.supprimerPatient(patient)) {
 				           System.out.println("Patient supprimé avec succès.");
 				       } else {
@@ -565,10 +562,9 @@ public class Main {
 
 		        HealthPro pro = (HealthPro) systeme.getUtilisateurConnecte();
 
-		     // Appel à la méthode singleton du système pour créer la consultation
+		     // Appel à la méthode singleton systeme pour créer la consultation
 		        try {
 		            systeme.creerConsultation(id,date, motif, observations, pro, patient);
-		            System.out.print("Consultation programmé avec succès"); 
 		        } catch (IllegalArgumentException e) {
 		            System.out.println(e.getMessage());
 		        }
@@ -595,7 +591,6 @@ public class Main {
 				}
 				Consultation ancienne = opt.get();
 
-				// Nouvelle date avec réessai si invalide ou indisponible
 				LocalDateTime nouvelleDate = null;
 				while (true) {
 				    System.out.print("Nouvelle date (yyyy-MM-dd HH:mm) ou ENTER pour garder l'ancienne : ");
@@ -606,7 +601,7 @@ public class Main {
 				    	LocalDateTime dateTemp = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 				    	if (dateTemp.isBefore(LocalDateTime.now())) {
 				    	    System.out.println("Erreur : la date doit être futur !");
-				    	    continue;  // redemande une date
+				    	    continue;  // redemande encore une date nouvelle date jusqu'a reussite
 				    	}
 				        boolean occupe = systeme.getConsultations().stream()
 				                .anyMatch(c ->
@@ -617,7 +612,7 @@ public class Main {
 
 				        if (occupe) {
 				            System.out.println("Le professionnel n'est pas disponible à cette date. Réessayez.");
-				            continue; // reessayer
+				            continue;
 				        }
 				        nouvelleDate = dateTemp;
 				        break;
@@ -637,8 +632,7 @@ public class Main {
 				System.out.print("Nouvelles observations ou ENTER pour garder l'ancien : ");
 				String nouvellesObservations = scanner.nextLine();
 				if (nouvellesObservations.isEmpty()) nouvellesObservations = null;
-
-				// Modifier la consultation
+				
 				systeme.modifierConsultation(id, nouvelleDate, nouveauMotif, nouvellesObservations);
 				 
 		}
@@ -653,7 +647,6 @@ public class Main {
 		        Patient patient = trouverPatient(); 
 		        if (patient == null) return;
 		        
-		        // Saisie des infos de la prescription
 		        System.out.print("Médicament: ");
 		        String medicament = scanner.nextLine();
 		        System.out.print("Posologie: ");
@@ -769,7 +762,6 @@ public class Main {
 			    System.out.print("Entrez l'ID du patient à archiver : ");
 			    String patientId = scanner.nextLine();
 
-			    // Appel via singleton
 			    if (systeme.archiverDossier(patientId)) {
 			        System.out.println("Dossier archivé avec succès !");
 			    } else {
@@ -827,12 +819,11 @@ public class Main {
 			    }
 			}
 
-		         // Pour récupérer le choix d'option de l'utilisateur qui interagit avec le systeme
 				private static int lireChoix() {
 					try {
 						return Integer.parseInt(scanner.nextLine());
 					} catch (NumberFormatException e) {
-						return -1; //Retourne -1 si entrée invalide
+						return -1; //Retourne -1 si le choix est invalide
 					}
 					
 			}

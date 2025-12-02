@@ -148,7 +148,7 @@ import java.util.ArrayList;
 		    return this.patients.remove(patient);
 		}
 	 
-	// Cherche un patient par son ID et retourne un Optional pour gérer le cas où il n'existe pas
+	// Cherche un patient par son ID 
 	 public Optional<Patient> rechercherPatient(String id) {
 	        return patients.stream().filter(p -> p.getId().equals(id)).findFirst();
 	        }
@@ -195,7 +195,7 @@ import java.util.ArrayList;
 
           if (ancienne == null) {
                  System.out.println("Aucune consultation trouvée pour l'ID : " + id);
-                  return; // On renvoi ce msg si consultation introuvable
+                  return; 
  }
 
        // Vérifie si la nouvelle date est libre pour le même professionnel
@@ -307,8 +307,7 @@ import java.util.ArrayList;
 	        }
 	    }
 	    
-	   // Supprime un utilisateur à partir de son login (Il doit exister d'abord)
-	   // Ne permet pas de supprimer l'utilisateur connecté
+	  
 	    public boolean supprimerUtilisateur(String login) {
 	        User utilisateurASupprimer = null;
 
@@ -368,7 +367,6 @@ import java.util.ArrayList;
 	    public boolean modifierRole(String login, String nouveauRole, String nouvelleSpecialite) {
 	        User utilisateurAModifier = null;
 
-	        // recherche de l'utilisateur
 	        for (User u : this.utilisateurs) {
 	        	if (u.getLogin().equalsIgnoreCase(login.trim())) {
 	                utilisateurAModifier = u;
@@ -377,7 +375,7 @@ import java.util.ArrayList;
 	        }
 
 	        if (utilisateurAModifier == null) {
-	            return false; // Utilisateur non trouvé
+	            return false; 
 	        }
 
 	        // Récupérer le mot de passe actuel
@@ -472,7 +470,7 @@ import java.util.ArrayList;
 		        .count();
 		    System.out.println("Nombre de pharmaciens: " + nbPharmaciens);
 
-		    // 4. Statistiques sur les actes
+		    // 4. Statistiques 
 		    long totalConsultations = patients.stream()
 		        .mapToLong(p -> p.getDossier().getConsultations().size())
 		        .sum();
@@ -514,7 +512,7 @@ import java.util.ArrayList;
 	    
 	                          //Méthodes ARCHIVAGE DU DOSSIER MEDICAL
 	    
-	    // Seul un médecin peut archiver
+	    
 	    public boolean archiverDossier(String patientId) {
 	    	
 		    MedicalRecord dossier = getDossierByPatientId(patientId);
@@ -525,7 +523,7 @@ import java.util.ArrayList;
 		    return false;
 		}
 		
-	    // Seul un médecin peut désarchiver
+	    
 		public boolean desarchiverDossier(String patientId) {
 			
 		    MedicalRecord dossier = getDossierByPatientId(patientId);
