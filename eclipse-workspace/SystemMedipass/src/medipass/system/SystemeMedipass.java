@@ -102,6 +102,8 @@ import java.util.ArrayList;
 	        utilisateurs.add(new Admin("U001", "Dupont", "Jean", LocalDate.of(1980, 1, 1), "admin", "adminpass"));
 	        utilisateurs.add(new HealthPro("U002", "Martin", "Sophie", LocalDate.of(1985, 5, 15), "sophie.martin", "medpass", "MEDECIN", "Généraliste"));
 	        utilisateurs.add(new HealthPro("U003", "Lefevre", "Paul", LocalDate.of(1978, 11, 20), "paul.lefevre", "medpass", "MEDECIN", "Cardiologie"));
+	        utilisateurs.add(new HealthPro("U004", "EDJA", "Roland", LocalDate.of(2005, 11, 20), "roland", "medpass", "PHARMACIEN", "Cardiologie"));
+	        utilisateurs.add(new HealthPro("U005", "OSHU", "Kemi", LocalDate.of(2000, 11, 11), "kemi", "medpass", "INFIRMIER", "Cardiologie"));
 
 	        // Patients
 	        Patient p1 = new Patient("P001", "Durand", "Marie", LocalDate.of(1975, 3, 10));
@@ -135,6 +137,7 @@ import java.util.ArrayList;
 
 	
 	 public boolean supprimerPatient(Patient patient) {
+		
 		    return this.patients.remove(patient);
 		}
 	 
@@ -153,10 +156,6 @@ import java.util.ArrayList;
 	// Vérifie que l'utilisateur est bien un HealthPro et qu'il est disponible à la date proposée
 	    public void creerConsultation(String id, LocalDateTime date, String motif,
 	                                          String observations, HealthPro professionnel, Patient patient) {
-	    	 if (!(utilisateurConnecte instanceof HealthPro)) {
-	    		 throw new IllegalArgumentException("Erreur: Seul un professionnel de santé peut créer une consultation.");
-	    	 }
-	             
 	    	 HealthPro pro = (HealthPro) utilisateurConnecte;
 	    	 
 
@@ -180,7 +179,7 @@ import java.util.ArrayList;
 	 // On peut changer la date, le motif ou les observations
 	    public void modifierConsultation(String id, LocalDateTime nouvelleDate,
                 String nouveauMotif, String nouvellesObservations) {
-       
+ 
 	    	// On cherche par id la consultation à modifier 
       Consultation ancienne = consultations.stream()
                    .filter(c -> c.getId().equals(id))
@@ -227,6 +226,7 @@ import java.util.ArrayList;
 	              //Ajout au dossier médical
     
 	public boolean ajouterAntecedent(Patient patient, String type, String description) {
+		  
 	    if (patient == null) return false;
 	    MedicalRecord dossier = patient.getDossier();
 	    if (dossier == null) return false;
@@ -241,8 +241,8 @@ import java.util.ArrayList;
 	    //Connexion, vérification login et mot de passe
 	    public User seConnecter(String login, String motDePasse) {
 	        for (User u : this.utilisateurs) {
-	            if (u.getLogin().equals(login) && u.verifierMotDePasse(motDePasse)) {
-	                this.utilisateurConnecte = u;
+	        	  if (u.getLogin().equals(login) && u.verifierMotDePasse(motDePasse)) {
+	        		  this.utilisateurConnecte = u;
 	                return u;
 	            }
 	        }
@@ -494,30 +494,22 @@ import java.util.ArrayList;
 	    
 	    // Seul un professionnel de santé peut faire l'ajout au dossier
 	    public void ajouterExamen(Patient patient, String type, String resultat, String demandeur) {
-	        if (utilisateurConnecte instanceof HealthPro) {
-	            HealthPro pro = (HealthPro) utilisateurConnecte;
+	    	
+	    	HealthPro pro = (HealthPro) getUtilisateurConnecte();
 	            String examenId = "E" + (patient.getDossier().getExamens().size() + 1);
 	            
 	            MedicalExam nouvelExamen = new MedicalExam(examenId, LocalDateTime.now(), type, resultat, pro);
 	            patient.getDossier().ajouterExamen(nouvelExamen);
 	            System.out.println("Examen " + type + " ajouté au dossier de " + patient.getNom());
-	        } else {
-	            System.out.println("Erreur: Seul un professionnel de santé peut ajouter un examen.");
-	        }
-	    } 
+	        } 
+	            
+	        
 	    
 	                          //Méthodes ARCHIVAGE DU DOSSIER MEDICAL
 	    
 	    // Seul un médecin peut archiver
 	    public boolean archiverDossier(String patientId) {
-
-		    // Vérifie que l'utilisateur connecté est un médecin
-		    if (!(utilisateurConnecte instanceof HealthPro) || 
-		         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("MEDECIN")) {
-		        System.out.println("Action non autorisée : seul un médecin peut archiver un dossier.");
-		        return false;
-		    }
-
+	    	
 		    MedicalRecord dossier = getDossierByPatientId(patientId);
 		    if (dossier != null && !dossier.isArchive()) {
 		        dossier.archiver();
@@ -528,12 +520,7 @@ import java.util.ArrayList;
 		
 	    // Seul un médecin peut désarchiver
 		public boolean desarchiverDossier(String patientId) {
-		    if (!(utilisateurConnecte instanceof HealthPro) || 
-		         !((HealthPro) utilisateurConnecte).getRole().equalsIgnoreCase("MEDECIN")) {
-		        System.out.println("Action non autorisée : seul un médecin peut désarchiver un dossier.");
-		        return false;
-		    }
-
+			
 		    MedicalRecord dossier = getDossierByPatientId(patientId);
 		    if (dossier != null && dossier.isArchive()) {
 		        dossier.desarchiver();
@@ -545,6 +532,11 @@ import java.util.ArrayList;
 		
 		
 		public void afficherDossiersArchives() {
+			
+			if (!(utilisateurConnecte instanceof HealthPro pro) || !pro.peutVoirListeDossiersArchives()) {
+		        System.out.println("Action non autorisée : seul un médecin ou un infirmier peut voir la liste des dossiers archivés.");
+		        return;
+			}
 		    System.out.println("\n--- Liste des dossiers archivés ---");
 		    boolean aucun = true;
 
@@ -565,6 +557,7 @@ import java.util.ArrayList;
 		
 		// Créer et ajouter la prescription dans le dossier
 		public Prescription creerPrescription(Patient patient, String medicament, String posologie, int duree) {
+			
 			if (patient == null)
 				return null;
 			String prescriptionId = "P" + (patient.getDossier().getPrescriptions().size() + 1);
@@ -578,6 +571,7 @@ import java.util.ArrayList;
 		
 		public boolean modifierPrescription(String prescriptionId, Patient patient, String nouveauMedicament,
 				String nouvellePosologie, int nouvelleDuree) {
+			
 			if (patient == null)
 				return false;
 

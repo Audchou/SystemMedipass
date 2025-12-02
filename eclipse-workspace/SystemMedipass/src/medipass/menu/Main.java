@@ -19,6 +19,7 @@ public class Main {
 	 private static SystemeMedipass systeme = SystemeMedipass.getInstance();
 	  private static Scanner scanner = new Scanner(System.in);
 	 private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	
 	 
 
 	public static void main(String[] args) {
@@ -50,40 +51,46 @@ public class Main {
 	}
 		    
 		    private static void menuConnexion() {
-	            User utilisateur = null;
-	            while (utilisateur == null) {
+		    	
+	            while (systeme.getUtilisateurConnecte() == null) {
 	                System.out.println("\n--- Connexion ---");
 	                System.out.print("Login: ");
 	                String login = scanner.nextLine();
 	                System.out.print("Mot de passe: ");
 	                String mdp = scanner.nextLine();
-
-	                utilisateur = systeme.seConnecter(login, mdp);
-
-	                if (utilisateur == null) {
-	                    System.out.println("Erreur de connexion. Veuillez réessayer.");
-	                }
-	            }
+     
+	            User utilisateur = systeme.seConnecter(login, mdp); // stocker le retour
+	            if (utilisateur != null) {
+	            	
+	            	System.out.println("\nConnexion réussie !");
+	                System.out.println("Bienvenu " + utilisateur.getNom() + ", vous êtes connecté en tant que " 
+	                                   + (utilisateur instanceof Admin ? "Administrateur" : "Professionnel de Santé"));
 	            // Redirection vers le menu correspondant au rôle
 	            if (utilisateur instanceof Admin) {
-		            menuAdministrateur();
+		            menuAdministrateur(utilisateur);
 		        } else if (utilisateur instanceof HealthPro) {
-		            menuProfessionnelSante();
+		            menuProfessionnelSante(utilisateur);
 		        }
-		    }
+	            break;
+	          }else {
+	              // Si login ou mot de passe incorrect
+	              System.out.println("Erreur de connexion. Veuillez réessayer.");
+	          }
+	        }
+	     }
+		    
+		
 
-		     private static void menuAdministrateur() {
-		    	 User admin = systeme.getUtilisateurConnecte();
+		     private static void menuAdministrateur(User admin) {
+		    
 		        int choix = -1;
 		        while (choix != 0) {
 		        	if (admin != null) {
 		        	    System.out.println("\n--- Menu Administrateur ---");
-		        	    System.out.println("Bienvenue Admin " + admin.getNom());
-		        	} else {
-		        	    System.out.println("Aucun utilisateur connecté !");
-		        	}
+		        	   
 		            System.out.println("1. Gestion des utilisateurs");
 		            System.out.println("2. Afficher les statistiques du système");
+		            System.out.println("3. Exporter les données (CSV - Bonus)");
 		            System.out.println("0. Déconnexion");
 		            System.out.print("Votre choix: ");
 		            int choixUser = lireChoix();
@@ -135,6 +142,9 @@ public class Main {
 		                case 2:
 		                	systeme.afficherStatistiques();
 		                	break;
+		                case 3:
+		                	systeme.exporterDonneesCSV();
+		                	break;
 		                case 0:
 		                	systeme.seDeconnecter();
 		                	 menuConnexion();
@@ -144,24 +154,21 @@ public class Main {
 		            }
 		                	
 		        }
-		    }
+		     }
+		  }
 		    		    
-		    private static void menuProfessionnelSante() {
-		    	User healthpro = systeme.getUtilisateurConnecte();
+		    private static void menuProfessionnelSante(User healthpro) {
+		    	
 		        int choix = -1;
 		        while (choix != 0) {
 		        	if (healthpro != null) {
 		        	    System.out.println("\n--- Menu Professionnel de Santé ---");
-		        	    System.out.println("Bienvenue ProSante " + healthpro.getNom());
-		        	} else {
-		        	    System.out.println("Aucun utilisateur connecté !");
-		        	}
+		        	    
 		        	System.out.println("1. Gestion des patients");
-		        	System.out.println("2. Gestion des consultations");
-		        	System.out.println("3. Gestion des prescriptions(Bonus)");
-		            System.out.println("4. Ajouter un examen médical (Bonus)");
-		            System.out.println("5. Exporter les données (CSV - Bonus)");
-		            System.out.println("6. Gestionnaire d'archives(Bonus)");
+		        	System.out.println("2. Gestion des consultations (Réservé uniquement au Médécin)");
+		        	System.out.println("3. Gestion des prescriptions(Bonus) ( Médécin et Pharmacien)");
+		            System.out.println("4. Ajouter un examen médical (Bonus) (Médécin))");
+		            System.out.println("5. Gestionnaire d'archives(Bonus) et (Réservé uniquement au Médécin et à l'Infirmier)");
 		            System.out.println("0. Déconexion");
 		            System.out.print("Votre choix: ");
 		            int choixPatient= lireChoix();
@@ -169,30 +176,30 @@ public class Main {
 		           
 		            switch (choixPatient) {
 		                case 1:
-		                	System.out.println("1. Inscrire un nouveau patient");
-		                	System.out.println("2. Ajouter des antécédents au dossier médical du patient");
-		 		            System.out.println("3. Supprimer un patient");
+		                	System.out.println("1. Inscrire un nouveau patient (Médécin et Infirmier)");
+		                	System.out.println("2. Ajouter des antécédents au dossier médical du patient (Médécin)");
+		 		            System.out.println("3. Supprimer un patient (Médécin)");
 		 		            System.out.println("4. Rechercher et consulter un dossier patient");
-		 		            System.out.println("5. Afficher la spécialité dominante d'un dossier médical patient (Bonus)");
+		 		            System.out.println("5. Afficher la spécialité dominante d'un dossier médical patient (Bonus)(Médécin et Infirmier)");
 		 		            System.out.print("Votre choix: ");
 		 		            choix = lireChoix();
 
 		 		           switch (choix) {
 			            case 1:
-		                    inscrirePatient();
+		                    inscrirePatient(healthpro);
 		                    break;
 		                case 2:
-		                    ajouterAntecedent();
+		                    ajouterAntecedent(healthpro);
 		                    break;
 		                    	
 		                case 3:
-							supprimerPatient();
+							supprimerPatient(healthpro);
 		                	break;
 		                case 4:
 		                	consulterDossierPatient();
 		                	break;
 		                case 5:
-		                	afficherSpecialiteDominante();
+		                	afficherSpecialiteDominante(healthpro);
 		                	break;
 
 
@@ -210,13 +217,13 @@ public class Main {
 				            
 				            switch (choixConsu) {
 			                case 1:
-			                	creerConsultation();
+			                	creerConsultation(healthpro);
 		                    break;
 		                    case 2:
-		                	    modifierConsultation();
+		                	    modifierConsultation(healthpro);
 		                	break;
 		                case 3:
-		                	    consultationsParSpecialite();
+		                	    consultationsParSpecialite(healthpro);
 		                	break;
 		                default:
 		                    System.out.println("Choix invalide.");
@@ -231,10 +238,10 @@ public class Main {
 				            
 				            switch (choixPresc) {
 			                case 1:
-			                	creerPrescription();
+			                	creerPrescription(healthpro);
 		                    break;
 		                    case 2:
-		                	    modifierPrescription();
+		                	    modifierPrescription(healthpro);
 		                	break;
 		                default:
 		                    System.out.println("Choix invalide.");
@@ -242,12 +249,10 @@ public class Main {
 				            break;
 				            
 		              case 4:
-		            	  ajouterExamen();
+		            	  ajouterExamen(healthpro);
 		            	  break;
+		            	  
 		              case 5:
-		            	  systeme.exporterDonneesCSV();
-		                  break;
-		              case 6:
 
 		            	  System.out.println("1. Archiver un dossier");
 		 		          System.out.println("2. Désarchiver un dossier");
@@ -256,10 +261,10 @@ public class Main {
 		 		         int choixArchive = lireChoix();
 		 		        switch (choixArchive) {
 		                case 1:
-		                	archiverDossier();
+		                	archiverDossier(healthpro);
 	                    break;
 	                    case 2:
-	                	    desarchiverDossier();
+	                	    desarchiverDossier(healthpro);
 	                	break;
 	                    case 3:
 	                    	systeme.afficherDossiersArchives();
@@ -280,6 +285,7 @@ public class Main {
 		            
 		        }
 		    }
+		 }
 		        
 		                	 
 		            	   // --- Méthodes de Saisie et Logique Métier ---
@@ -423,7 +429,12 @@ public class Main {
 
 		              // Gestion PATIENTS
 		    
-		    private static void inscrirePatient() {
+		    private static void inscrirePatient(User healthpro) {
+		    	
+		    	if (!(healthpro instanceof HealthPro) || !((HealthPro) healthpro).peutAjouterDossier()) {
+		            System.out.println("Erreur : seul un médecin ou un infirmier peut ajouter un dossier médical pour un patient.");
+		            return;
+		        }
 		        System.out.println("\n--- Inscription d'un Patient ---");
 		        System.out.print("ID Patient (ex: P003): ");
 		        String id = scanner.nextLine().trim().toUpperCase();
@@ -451,7 +462,11 @@ public class Main {
 		        }
 		    }
 	        
-	        private static void supprimerPatient() {
+	        private static void supprimerPatient(User healthpro) {
+	        	 if (!(healthpro instanceof HealthPro) || !((HealthPro) healthpro).peutSupprimerDossier()) {
+	        	        System.out.println("Erreur : seul un médecin peut supprimer un patient.");
+	        	        return;
+	        	    }
 				   System.out.print("Entrez l'ID du patient à supprimer : ");
 				   String id = scanner.nextLine();
 
@@ -477,7 +492,12 @@ public class Main {
 	        
 	                       // Gestion CONSULTATIONS
 	        
-		    private static void creerConsultation() {
+		    private static void creerConsultation(User healthpro) {
+		    	
+		    	 if (!(healthpro instanceof HealthPro hp) || !hp.peutCreerConsultation()) {
+		    	        System.out.println("Erreur : seul un médecin peut créer une consultation.");
+		    	        return;
+		    	    }
 		        Patient patient = trouverPatient();
 		        if (patient == null) return;
 		        System.out.print("Entrez l'ID de la consultation (ex: C001): ");
@@ -521,11 +541,6 @@ public class Main {
 		        }
 
 
-		        
-		        if (!(systeme.getUtilisateurConnecte() instanceof HealthPro)) {
-		            System.out.println("Erreur : Seul un professionnel de santé peut créer une consultation.");
-		            return;
-		        }
 		        HealthPro pro = (HealthPro) systeme.getUtilisateurConnecte();
 
 		     // Appel à la méthode singleton du système pour créer la consultation
@@ -538,7 +553,12 @@ public class Main {
 		    }
 		    
 		    
-			private static void modifierConsultation() {
+			private static void modifierConsultation(User healthpro) {
+				
+				if (!(healthpro instanceof HealthPro hp) || !hp.peutModifierConsultation()) {
+		            System.out.println("Erreur : seul un médecin peut modifier une consultation.");
+		            return;
+		        }
 				System.out.print("ID de la consultation à modifier : ");
 				String id = scanner.nextLine();
 
@@ -602,7 +622,12 @@ public class Main {
 		}
 			
 			               //Gestion PRESCRITIONS
-			private static void creerPrescription() {
+			private static void creerPrescription(User healthpro) {
+				
+				if (!(healthpro instanceof HealthPro pro) || !pro.peutModifierPrescription()) {
+			        System.out.println("Erreur : seul le médecin ou le pharmacien peut créer une prescription.");
+			        return;
+			    }
 		        Patient patient = trouverPatient(); 
 		        if (patient == null) return;
 		        
@@ -625,7 +650,12 @@ public class Main {
 
 		    
 		   
-		    	private static void modifierPrescription() {
+		    	private static void modifierPrescription(User healthpro) {
+		    		
+		    		 if (!(healthpro instanceof HealthPro pro) || !pro.peutModifierPrescription()) {
+					        System.out.println("Erreur : seul le médecin ou le pharmacien peut modifier une prescription.");
+					        return;
+					    }
 		    	    Patient patient = trouverPatient();
 		    	    if (patient == null) return;
 
@@ -650,7 +680,12 @@ public class Main {
 
 
             
-		    private static void ajouterExamen() {
+		    private static void ajouterExamen(User healthpro) {
+		    	
+		    	if (!(healthpro instanceof HealthPro pro) || !pro.peutAjouterExamenMedical()) {
+		    	    System.out.println("Erreur : seul un médecin peut ajouter un examen médical.");
+		    	    return;
+		    	}
 		        Patient patient = trouverPatient();
 		        if (patient == null) return;
 
@@ -664,7 +699,12 @@ public class Main {
 				systeme.ajouterExamen(patient, type, resultat, demandeur);
 		    }
 
-		    private static void afficherSpecialiteDominante() {
+		    private static void afficherSpecialiteDominante(User healthpro) {
+		    	
+		    	if (!(healthpro instanceof HealthPro hp) || !hp.voirSpecialiteDominante()) {
+		            System.out.println("Erreur : seul le médecin peut voir la spécialité dominante.");
+		            return;
+		        }
 		        Patient patient = trouverPatient();
 		        if (patient != null) {
 		            System.out.println("\n--- Catégorisation du Dossier ---");
@@ -673,7 +713,12 @@ public class Main {
 		    }
 		    
 		    // Afficher toutes les consultations pour une spécialité donnée    
-		    private static void consultationsParSpecialite() {
+		    private static void consultationsParSpecialite(User healthpro) {
+		    	
+		    	 if (!(healthpro instanceof HealthPro pro) || !pro.voirSpecialiteDominante()) {
+		    	        System.out.println("Erreur : seul un médecin peut consulter les consultations par spécialité.");
+		    	        return;
+		    	    }
 		    	
 		    	    System.out.print("Entrez la spécialité recherchée: ");
 		    	    String specialite = scanner.nextLine();
@@ -693,7 +738,12 @@ public class Main {
 	        
 		                  // ARCHIVAGE
 		     
-		   private static void archiverDossier() {
+		   private static void archiverDossier(User healthpro) {
+			   
+			   if (!(healthpro instanceof HealthPro pro) || !pro.peutArchiverDossier()) {
+		            System.out.println("Action non autorisée : seul un médecin ou un infirmier peut archiver un dossier.");
+		            return;
+		        }
 			    System.out.print("Entrez l'ID du patient à archiver : ");
 			    String patientId = scanner.nextLine();
 
@@ -707,8 +757,12 @@ public class Main {
 	    }
 		  
 		   
-		   private static void desarchiverDossier() {
+		   private static void desarchiverDossier(User healthpro) {
 		   
+			   if (!(healthpro instanceof HealthPro pro) || !pro.peutDesarchiverDossier()) {
+			        System.out.println("Action non autorisée : seul un médecin ou un infirmier peut désarchiver un dossier.");
+			        return;  }
+			 
 		   System.out.print("Entrez l'ID du patient à désarchiver : ");
 		    String patientId = scanner.nextLine();
 
@@ -719,7 +773,12 @@ public class Main {
 		    }
 		   }
 		   
-		   private static void ajouterAntecedent() {
+		   private static void ajouterAntecedent(User healthpro) {
+			   
+			   if (!(healthpro instanceof HealthPro pro) || !pro.peutAjouterAntecedent()) {
+			        System.out.println("Erreur : seul le médecin peut ajouter des antécédents.");
+			        return;
+			    }
 			    System.out.print("Entrez l'ID du patient : ");
 			    String id = scanner.nextLine().trim().toUpperCase();
 

@@ -31,8 +31,61 @@ public class HealthPro  extends User {
     
  
    
- 
+	 // Contrôles d'accès
+	    public boolean peutCreerConsultation() {
+	        return getRole().equalsIgnoreCase("MEDECIN");
+	    }
+
+	    public boolean peutModifierConsultation() {
+	        return getRole().equalsIgnoreCase("MEDECIN");
+	    }
+
+	    public boolean peutVoirConsultationsParSpecialite() {
+	        return getRole().equalsIgnoreCase("MEDECIN");
+	    }
+
+	    public boolean peutAjouterAntecedent() {
+	        return getRole().equalsIgnoreCase("MEDECIN");
+	    }
+
+	    public boolean peutModifierPrescription() {
+	        return getRole().equalsIgnoreCase("MEDECIN") || getRole().equalsIgnoreCase("PHARMACIEN");
+	    }
+
+	    public boolean peutCreerPrescription() {
+	        return getRole().equalsIgnoreCase("MEDECIN") || getRole().equalsIgnoreCase("PHARMACIEN");
+	    }
+
+	    public boolean peutConsulterDossierMedical() {
+	        return true; // Tous les professionnels peuvent consulter
+	    }
+	    
+	    public boolean peutAjouterDossier() {
+	        return this.getRole().equalsIgnoreCase("MEDECIN") || getRole().equalsIgnoreCase("INFIRMIER");
+	    }
+	    
+	    public boolean peutSupprimerDossier() {
+	        return this.getRole().equalsIgnoreCase("MEDECIN");
+	    }
+
+	    public boolean voirSpecialiteDominante() {
+	        return this.getRole().equalsIgnoreCase("MEDECIN");
+	    }
+	    public boolean peutArchiverDossier() {
+	        return getRole().equalsIgnoreCase("MEDECIN") || getRole().equalsIgnoreCase("INFIRMIER");
+	    }
+
+	    public boolean peutDesarchiverDossier() {
+	        return getRole().equalsIgnoreCase("MEDECIN") || getRole().equalsIgnoreCase("INFIRMIER");
+	    }
+
+	    public boolean peutVoirListeDossiersArchives() {
+	        return getRole().equalsIgnoreCase("MEDECIN") || getRole().equalsIgnoreCase("INFIRMIER");
+	    }
+	    
+	    public boolean peutAjouterExamenMedical() {
+	        return getRole().equalsIgnoreCase("MEDECIN");
+	    }
+	}
 
 
-
-}
