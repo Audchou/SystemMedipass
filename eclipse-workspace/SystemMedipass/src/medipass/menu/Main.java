@@ -465,6 +465,11 @@ public class Main {
 		            System.out.println("Patient introuvable !");
 		            return;
 		        }
+		        if (utilisateur instanceof HealthPro) {
+		            System.out.println(patient.getDossier());
+		            return;
+		        }
+
                     if (utilisateur instanceof Admin) {
 		            System.out.print("Code de dérogation requis : ");
 		            String code = scanner.nextLine().trim();
