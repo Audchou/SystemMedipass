@@ -12,6 +12,9 @@ import java.util.ArrayList;
 	public class SystemeMedipass {
 	    // Singleton
 	    private static SystemeMedipass instance;
+	    
+	    // Les administrateurs peuvent consulter les dossiers médicaux des patients exceptionnellement via un code de dérogation. 
+        private static final String CODE_DEROGATION_ADMIN = "MEDIPASS2025";
 
 	    // Collections
 	    private List<Patient> patients;
@@ -123,6 +126,10 @@ import java.util.ArrayList;
 	        
 	        patients.add(p1);
 	        patients.add(p2);
+	 }
+	 
+	 public boolean verifierCodeDerogation(String code) {
+		 return CODE_DEROGATION_ADMIN.equals(code);
 	 }
 	 
 	 

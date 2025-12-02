@@ -91,6 +91,7 @@ public class Main {
 		            System.out.println("1. Gestion des utilisateurs");
 		            System.out.println("2. Afficher les statistiques du système");
 		            System.out.println("3. Exporter les données (CSV - Bonus)");
+		            System.out.println("4. Consulter le dossier médical d'un patient (Admin autorisé avec code de dérogation)");
 		            System.out.println("0. Déconnexion");
 		            System.out.print("Votre choix: ");
 		            int choixUser = lireChoix();
@@ -145,6 +146,9 @@ public class Main {
 		                case 3:
 		                	systeme.exporterDonneesCSV();
 		                	break;
+		                case 4:
+		                	consulterDossierPatient(admin);
+		                	break;
 		                case 0:
 		                	systeme.seDeconnecter();
 		                	 menuConnexion();
@@ -196,7 +200,7 @@ public class Main {
 							supprimerPatient(healthpro);
 		                	break;
 		                case 4:
-		                	consulterDossierPatient();
+		                	consulterDossierPatient(healthpro);
 		                	break;
 		                case 5:
 		                	afficherSpecialiteDominante(healthpro);
@@ -455,12 +459,25 @@ public class Main {
 		        System.out.println("Patient créé avec succès : " + nom + " " + prenom);
 	}
 	
-	        private static void consulterDossierPatient() {
+		    private static void consulterDossierPatient(User utilisateur) {
 		        Patient patient = trouverPatient();
-		        if (patient != null) {
-		            System.out.println(patient.getDossier());
+		        if (patient == null) {
+		            System.out.println("Patient introuvable !");
+		            return;
 		        }
+                    if (utilisateur instanceof Admin) {
+		            System.out.print("Code de dérogation requis : ");
+		            String code = scanner.nextLine().trim();
+		            if ("MEDIPASS2025".equals(code)) { // ton code de dérogation
+		                System.out.println("Code valide, accès autorisé.");
+		                System.out.println(patient.getDossier());
+		            } else {
+		                System.out.println("Code invalide, accès refusé.");
+		            }
+		        } 
 		    }
+
+
 	        
 	        private static void supprimerPatient(User healthpro) {
 	        	 if (!(healthpro instanceof HealthPro) || !((HealthPro) healthpro).peutSupprimerDossier()) {
