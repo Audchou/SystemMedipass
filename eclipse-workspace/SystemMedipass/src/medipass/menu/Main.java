@@ -26,9 +26,9 @@ public class Main {
 		
 		 // Affichage du menu principal entrée  
 		 System.out.println("===================================================");
-	        System.out.println("  Système d'Information Médical Medipass (Console) ");
+	        System.out.println("  Système d'Informations Médicales Medipass (Console) ");
 	        System.out.println("===================================================");
-	        System.out.println("Bienvenu dans votre gestionnaire d'information médical !");
+	        System.out.println("Bienvenu dans votre gestionnaire d'informations médicales !");
 	        System.out.println("1 - Se connecter");
 		    System.out.println("2 - Quitter le programme");
 		    System.out.print("Entrez votre choix : ");
@@ -45,7 +45,7 @@ public class Main {
 		    	 System.out.println("Merci d'avoir utilisé l'application et à bientôt peut être !");
 			        continuer = false;
 		        } else {
-		        System.out.println("Votre choix ne correspoond à aucune option");
+		        System.out.println("Votre choix ne correspond à aucune option");
 		    }
 		} 
 	}
@@ -63,7 +63,7 @@ public class Main {
 	            if (utilisateur != null) {
 	            	
 	            	System.out.println("\nConnexion réussie !");
-	                System.out.println("Bienvenu " + utilisateur.getNom() + ", vous êtes connecté en tant que " 
+	                System.out.println("Bienvenue " + utilisateur.getNom() + ", vous êtes connecté en tant que " 
 	                                   + (utilisateur instanceof Admin ? "Administrateur" : "Professionnel de Santé"));
 	            
 	                // Redirection vers le menu correspondant au rôle
@@ -171,9 +171,9 @@ public class Main {
 		        	    
 		        	System.out.println("1. Gestion des patients");
 		        	System.out.println("2. Gestion des consultations (Réservé uniquement au Médécin)");
-		        	System.out.println("3. Gestion des prescriptions(Bonus) ( Médécin et Pharmacien)");
-		            System.out.println("4. Ajouter un examen médical (Bonus) (Médécin))");
-		            System.out.println("5. Gestionnaire d'archives(Bonus) et (Réservé uniquement au Médécin et à l'Infirmier)");
+		        	System.out.println("3. Gestion des prescriptions (Bonus réservé uniquement au Médécin et Pharmacien)");
+		            System.out.println("4. Ajouter un examen médical (Bonus réservé uniquement au Médécin)");
+		            System.out.println("5. Gestionnaire d'archives (Bonus réservé uniquement au Médécin et à l'Infirmier)");
 		            System.out.println("0. Déconexion");
 		            System.out.print("Votre choix: ");
 		            int choixPatient= lireChoix();
@@ -185,7 +185,7 @@ public class Main {
 		                	System.out.println("2. Ajouter des antécédents au dossier médical du patient (Médécin)");
 		 		            System.out.println("3. Supprimer un patient (Médécin)");
 		 		            System.out.println("4. Rechercher et consulter un dossier patient");
-		 		            System.out.println("5. Afficher la spécialité dominante d'un dossier médical patient (Bonus)(Médécin et Infirmier)");
+		 		            System.out.println("5. Afficher la spécialité dominante d'un dossier médical patient (Bonus réservé uniquement au Médécin et Infirmier)");
 		 		            System.out.print("Votre choix: ");
 		 		            choix = lireChoix();
 
