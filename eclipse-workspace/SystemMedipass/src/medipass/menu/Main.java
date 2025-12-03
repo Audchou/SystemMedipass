@@ -74,7 +74,7 @@ public class Main {
 		        }
 	            break;
 	          }else {
-	              // Si le login ou mot de passe incorrect
+	             
 	              System.out.println("Erreur de connexion. Veuillez réessayer.");
 	          }
 	        }
