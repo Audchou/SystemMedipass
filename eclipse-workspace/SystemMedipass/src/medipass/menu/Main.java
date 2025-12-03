@@ -28,7 +28,7 @@ public class Main {
 		 System.out.println("===================================================");
 	        System.out.println("  Système d'Informations Médicales Medipass (Console) ");
 	        System.out.println("===================================================");
-	        System.out.println("Bienvenu dans votre gestionnaire d'informations médicales !");
+	        System.out.println("Bienvenue dans votre gestionnaire d'informations médicales !");
 	        System.out.println("1 - Se connecter");
 		    System.out.println("2 - Quitter le programme");
 		    System.out.print("Entrez votre choix : ");
